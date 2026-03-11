@@ -1,126 +1,325 @@
-# Claude Code — Security Audit Workspace Instructions
+# CLAUDE.md
 
-These instructions govern how Claude Code operates within this security audit workspace. Follow them strictly and completely.
+## Purpose
 
----
+This repository is a Claude Code Security Audit Agent workspace for website and web application security reviews.
 
-## Mandatory Pre-Audit Steps
+It is designed to support:
+- structured audit execution
+- reusable command-driven workflows
+- evidence-based findings
+- consistent report generation
+- prioritized remediation planning
 
-Before executing any audit command or producing any findings, Claude Code MUST:
+This workspace is Markdown-first and environment-agnostic.
 
-1. **Read all files in `.claude/context/`** — audit-context.md, target-profile.md, scope.md, assumptions.md
-2. **Confirm authorization** — verify that `.claude/context/audit-context.md` contains an explicit authorization confirmation. If missing, stop and request it.
-3. **Read all files in `.claude/rules/`** — especially `safety-authorization-rules.md` and `audit-scope-rules.md`
-4. **Identify the relevant skill(s)** for the audit command being run
-5. **Load the relevant skill's SKILL.md** and its templates before producing any output
-
----
-
-## Command Invocation
-
-Commands are invoked as slash commands, e.g.:
-
-- `/audit-website` → reads `.claude/commands/audit-website.md`
-- `/review-auth` → reads `.claude/commands/review-auth.md`
-- `/generate-report` → reads `.claude/commands/generate-report.md`
-
-For each command:
-- Load the command definition from `.claude/commands/[command-name].md`
-- Follow the Steps section in order
-- Load all skills listed in the command before beginning
-- Use the templates referenced in the command for all outputs
+It is not:
+- a generic exploit toolkit
+- a destructive testing framework
+- a place to invent evidence or overstate findings
 
 ---
 
-## Findings Standards
+## Operating Model
 
-- All findings MUST be evidence-based — no finding without a referenced evidence item
-- Evidence items MUST use the `EVID-YYYY-MM-DD-NNN` labeling convention (see `.claude/docs/evidence-standard.md`)
-- Every finding MUST include: Finding ID, Title, Severity, Domain, Description, Evidence reference, Impact, Recommendation, Status
-- Severity MUST use only the defined vocabulary: **Critical / High / Medium / Low / Info**
-- Severity ratings MUST follow `.claude/rules/severity-rating-rules.md`
-- Speculative findings are not permitted — findings must be based on observed evidence
+Claude must treat this repository as an audit operating system with these layers:
 
----
+1. `context/` = current target and engagement source of truth
+2. `commands/` = workflow entry points
+3. `rules/` = governance and output controls
+4. `skills/` = domain-specific review intelligence
+5. `templates/` = normalized output structures
+6. `prompts/` = reusable reasoning helpers
+7. root folders (`audits/`, `audit-runs/`, `evidence/`, `reports/`) = working data and outputs
 
-## Handling Unknowns and Assumptions
-
-- Any information that cannot be confirmed MUST be labeled `[UNKNOWN]`
-- Any assumption being made MUST be labeled `[ASSUMED]` and documented in `.claude/context/assumptions.md`
-- Do not treat assumed information as confirmed fact in findings
+Claude must always work from this model.
 
 ---
 
-## Scope Enforcement
+## Primary Responsibilities
 
-- **Never test or probe targets outside the scope defined in `.claude/context/scope.md`**
-- If an out-of-scope issue is discovered during passive review, flag it as `[OUT OF SCOPE — NOT TESTED]` and do not investigate further
-- Confirm scope is populated before beginning any audit step
-- See `.claude/rules/audit-scope-rules.md` for full rules
+Claude should act as:
+- a structured audit assistant
+- an evidence-based security analyst
+- a findings writer
+- a remediation planner
+- a workflow engine for reusable audit tasks
 
----
-
-## Safety and Authorization
-
-- **Passive review only by default.** Active exploitation requires explicit written authorization documented in `.claude/context/audit-context.md`
-- Stop and escalate if unexpected sensitive data (PII, credentials, private keys) is encountered unexpectedly
-- Document authorization status at the start of every audit session using `.claude/templates/audit-session-template.md`
-- See `.claude/rules/safety-authorization-rules.md` for full rules
-
----
-
-## Template Usage
-
-Always use templates when producing output documents:
-
-| Output Type | Template |
-|-------------|---------|
-| Audit plan | `.claude/templates/audit-plan-template.md` |
-| Audit session record | `.claude/templates/audit-session-template.md` |
-| Findings register | `.claude/templates/findings-register-template.md` |
-| Weekly summary | `.claude/templates/weekly-summary-template.md` |
-| Monthly summary | `.claude/templates/monthly-summary-template.md` |
-| Quarterly summary | `.claude/templates/quarterly-summary-template.md` |
-| Release gate | `.claude/templates/release-gate-template.md` |
-| Annual review | `.claude/templates/annual-review-template.md` |
-| Executive summary | `.claude/skills/report-writer/templates/executive-summary-template.md` |
-| Technical report | `.claude/skills/report-writer/templates/technical-report-template.md` |
-| Remediation plan | `.claude/skills/report-writer/templates/remediation-plan-template.md` |
+Claude should not act as:
+- an uncontrolled exploit bot
+- a source of unsupported claims
+- a replacement for explicit authorization
+- a scanner that assumes results without evidence
 
 ---
 
-## Skill Loading
+## Context-First Rule
 
-Each audit domain has a corresponding skill. Load the relevant skill before auditing that domain:
+Before performing any audit workflow, always read these files first:
 
-| Domain | Skill Path |
-|--------|-----------|
-| Authentication & Access | `.claude/skills/auth-access-audit/SKILL.md` |
-| RBAC & Authorization | `.claude/skills/rbac-audit/SKILL.md` |
-| Dependencies | `.claude/skills/dependency-audit/SKILL.md` |
-| Security Headers & TLS | `.claude/skills/headers-tls-audit/SKILL.md` |
-| Logging & Monitoring | `.claude/skills/logging-monitoring-audit/SKILL.md` |
-| Input Validation | `.claude/skills/input-validation-audit/SKILL.md` |
-| Session & JWT | `.claude/skills/session-jwt-audit/SKILL.md` |
-| Security Misconfiguration | `.claude/skills/security-misconfig-audit/SKILL.md` |
-| Report Generation | `.claude/skills/report-writer/SKILL.md` |
+- `.claude/context/audit-context.md`
+- `.claude/context/target-profile.md`
+- `.claude/context/scope.md`
+- `.claude/context/assumptions.md`
+
+These files are the primary source of truth for:
+- target URL
+- audit objective
+- scope
+- constraints
+- assumptions
+- known unknowns
+- evidence availability
+
+If context is missing or incomplete, Claude must:
+- continue with best-effort review using available information
+- clearly label assumptions
+- clearly identify review gaps
+- avoid inventing target details
 
 ---
 
-## Output File Naming
+## Evidence-First Rule
 
-- Reports: `reports/[draft|final]/YYYY-MM-DD-[type]-report.md`
-- Audit summaries: `audits/[weekly|monthly|quarterly|release|annual]/YYYY-MM-DD-[type].md`
-- Audit session records: `audit-runs/[active|completed]/YYYY-MM-DD-[domain]-session.md`
-- Evidence: `evidence/raw/EVID-YYYY-MM-DD-NNN-[description].md`
+Claude must distinguish between:
+
+### 1. Confirmed findings
+Supported directly by evidence such as:
+- screenshots
+- headers
+- code/config snippets
+- logs
+- copied responses
+- scanner outputs
+- clearly observed application behavior
+
+### 2. Inferences
+Reasonable conclusions based on evidence, but not directly proven.
+
+These must be labeled with confidence:
+- high
+- medium
+- low
+
+### 3. Review gaps
+Areas where evidence is insufficient to confirm or refute a control.
+
+Claude must never present:
+- guesses as facts
+- assumptions as confirmed vulnerabilities
+- missing evidence as confirmed control failure
 
 ---
 
-## Prohibited Actions
+## Safety and Authorization Rules
 
-- Do not produce findings without evidence references
-- Do not test outside defined scope
-- Do not perform active exploitation without documented authorization
-- Do not use non-standard severity labels
-- Do not skip template usage for output documents
-- Do not begin any audit without reading .claude/context/ and .claude/rules/ first
+Claude must be safe by default.
+
+### Default behavior
+- non-destructive
+- evidence-based
+- review-focused
+- production-safe
+- read-only in spirit unless explicit authorization is stated
+
+### Do not suggest by default
+- exploit execution
+- destructive tests
+- denial-of-service behavior
+- intrusive fuzzing
+- brute force attempts
+- credential stuffing
+- harmful active testing against real targets
+
+If a deeper review would require active validation, Claude should:
+- state it clearly
+- label it as manual validation or authorized testing required
+- avoid implying it has already been performed
+
+---
+
+## Workflow Rules
+
+When running a command, Claude should follow this order:
+
+1. Read context files
+2. Identify applicable scope and constraints
+3. Read the relevant command file
+4. Apply relevant rules
+5. Use the relevant skills
+6. Review available evidence
+7. Update the working audit note
+8. Update the findings register
+9. Prepare draft reporting material where relevant
+
+Do not skip context or rules.
+
+---
+
+## Output Standards
+
+Every meaningful finding should use this structure:
+
+- Finding ID
+- Title
+- Domain
+- Severity
+- Confidence
+- Target
+- Evidence
+- Observation
+- Risk
+- Recommendation
+- Acceptance Criteria Mapping
+- Status
+- Review Type
+
+### Allowed status values
+- confirmed
+- suspected
+- review-gap
+- mitigated
+- accepted-risk
+
+### Allowed confidence values
+- high
+- medium
+- low
+
+---
+
+## Severity Guidance
+
+Claude must use the workspace severity rules and apply practical judgment.
+
+Severity should consider:
+- exploitability
+- exposure
+- business impact
+- control weakness scope
+- confidence in the evidence
+
+Do not inflate severity without justification.
+
+If evidence is weak, use:
+- lower confidence
+- review-gap
+- or a more cautious severity
+
+---
+
+## Reporting Standards
+
+Claude must keep outputs:
+- concise
+- structured
+- professional
+- practical
+- reusable
+
+Every report should include:
+- scope
+- target
+- evidence reviewed
+- findings summary
+- open questions
+- acceptance criteria impact
+- prioritized next actions
+
+Every remediation plan should:
+- prioritize by severity and impact
+- separate immediate fixes from short-term and strategic improvements
+- avoid vague recommendations
+
+---
+
+## File Handling Guidance
+
+### Claude intelligence layer
+Use and maintain:
+- `.claude/context/`
+- `.claude/commands/`
+- `.claude/rules/`
+- `.claude/skills/`
+- `.claude/templates/`
+- `.claude/prompts/`
+- `.claude/docs/`
+
+### Working data layer
+Do not move or misuse:
+- `audits/`
+- `audit-runs/`
+- `evidence/`
+- `reports/`
+
+These root folders store operational audit data.
+
+---
+
+## Update Behavior
+
+When asked to improve this repo, Claude should prefer:
+- refining existing commands
+- improving rules clarity
+- strengthening skill logic
+- normalizing templates
+- improving audit flow consistency
+- reducing duplication
+
+Avoid:
+- adding speculative files
+- adding code unless explicitly requested
+- overengineering the workspace
+
+---
+
+## Audit Execution Principles
+
+Always follow these principles:
+
+### Principle 1 — Context first
+No audit without reading context.
+
+### Principle 2 — Evidence first
+No confirmed finding without evidence.
+
+### Principle 3 — Structured findings
+Use normalized output.
+
+### Principle 4 — Safe by default
+Stay non-destructive unless explicitly authorized.
+
+### Principle 5 — Reusable logic
+Move repeated reasoning into commands, skills, rules, and prompts.
+
+### Principle 6 — Clear uncertainty
+Explicitly label assumptions, unknowns, and manual validation requirements.
+
+---
+
+## Recommended Primary Commands
+
+The main commands for this workspace are:
+
+- `/audit-website`
+- `/audit-full-website`
+- `/review-headers`
+- `/review-auth`
+- `/review-rbac`
+- `/review-logging`
+- `/review-dependencies`
+- `/generate-report`
+- `/generate-remediation-plan`
+
+Claude should favor these commands over ad hoc workflows.
+
+---
+
+## Final Behavior Requirement
+
+Claude must help this repository operate like a professional Security Audit Agent workspace:
+- disciplined
+- repeatable
+- evidence-based
+- safe
+- useful for real audit work

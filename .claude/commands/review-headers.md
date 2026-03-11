@@ -1,142 +1,253 @@
 # Command: /review-headers
 
-Focused review of HTTP security headers, TLS configuration, and certificate validity. Loads the headers-tls-audit skill and produces a complete headers and transport security assessment.
+## Objective
 
-## Trigger
+Review browser-facing security headers and HTTPS posture for the target website.
 
-Invoked when the user wants to review HTTP security headers and TLS configuration. Can be run standalone, as part of `/audit-weekly`, or as part of any broader audit.
+This command evaluates the application's visible HTTP response headers and transport security indicators to identify security weaknesses, misconfigurations, or missing protections.
 
----
-
-## Pre-Conditions
-
-1. `.claude/context/audit-context.md` is populated and Authorization Status is **CONFIRMED**
-2. Target URL(s) are defined in `.claude/context/scope.md`
+This review is **non-destructive** and based only on available evidence.
 
 ---
 
-## Steps
+## Required Inputs
 
-### Step 1: Context Load
+Read context first:
 
-1. Read `.claude/context/audit-context.md` — confirm authorization
-2. Read `.claude/context/scope.md` — note in-scope URLs to test
-3. Read `.claude/context/target-profile.md` — note CDN or WAF presence (may affect observed headers)
+- `.claude/context/audit-context.md`
+- `.claude/context/target-profile.md`
+- `.claude/context/scope.md`
 
-### Step 2: Load Skill
+Apply rules:
 
-Load: `.claude/skills/headers-tls-audit/SKILL.md`
+- `.claude/rules/audit-scope-rules.md`
+- `.claude/rules/evidence-quality-rules.md`
+- `.claude/rules/severity-rating-rules.md`
+- `.claude/rules/safety-authorization-rules.md`
 
-Read:
-- `.claude/skills/headers-tls-audit/templates/headers-checklist.md`
-- `.claude/skills/headers-tls-audit/templates/tls-review-template.md`
+Use skill:
 
-### Step 3: HTTP Security Headers Review
+- `.claude/skills/headers-tls-audit/SKILL.md`
 
-Using `headers-checklist.md`, assess each security header:
+Evidence sources:
 
-#### Content-Security-Policy (CSP)
-- Is CSP present?
-- Does the policy use `default-src 'self'` or equivalent restrictive base?
-- Does the policy avoid `unsafe-inline` and `unsafe-eval` in script-src?
-- Is there a `report-uri` or `report-to` directive for violation reporting?
-- Is the policy in enforcement mode (`Content-Security-Policy`) or report-only mode (`Content-Security-Policy-Report-Only`)?
-- Assessment: Strong / Adequate / Weak / Missing
+- `evidence/raw/`
+- `evidence/reviewed/`
+- `evidence/summarized/`
 
-#### Strict-Transport-Security (HSTS)
-- Is HSTS present?
-- What is the `max-age` value? (Recommended: ≥ 15768000 / 6 months)
-- Are `includeSubDomains` and `preload` directives present?
-- Assessment: Strong / Adequate / Weak / Missing
+---
+
+## Review Scope
+
+This review focuses on browser security controls visible through HTTP responses.
+
+Primary areas include:
+
+### Transport Security
+- HTTPS enforcement
+- HSTS usage
+- mixed content exposure indicators
+
+### Response Security Headers
+
+Evaluate presence and configuration of:
+
+- `Strict-Transport-Security`
+- `Content-Security-Policy`
+- `X-Frame-Options`
+- `X-Content-Type-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+
+### Cookie Security Indicators
+
+Where visible:
+
+- `Secure`
+- `HttpOnly`
+- `SameSite`
+
+### Server Information Exposure
+
+Evaluate response headers for:
+
+- server identification
+- framework disclosure
+- version leakage
+
+---
+
+## Audit Method
+
+### Step 1 — Read Context
+
+Determine:
+
+- target website URL
+- scope boundaries
+- allowed testing posture
+- known architecture hints
+
+If only public evidence exists, limit conclusions accordingly.
+
+---
+
+### Step 2 — Review Available Evidence
+
+Search the evidence folders for:
+
+- captured HTTP headers
+- browser developer console outputs
+- scanner results
+- curl responses
+- screenshots showing headers
+
+Summarize:
+
+- what headers are visible
+- which controls exist
+- which controls are missing
+- which controls appear weak or misconfigured
+
+---
+
+### Step 3 — Analyze Transport Security
+
+Assess:
+
+- HTTPS usage consistency
+- redirect from HTTP to HTTPS
+- HSTS presence
+- potential downgrade exposure
+
+Classify results as:
+
+- confirmed control
+- suspected weakness
+- review gap
+
+---
+
+### Step 4 — Analyze Response Headers
+
+Evaluate each key header.
+
+#### Strict-Transport-Security
+Check:
+
+- header presence
+- reasonable max-age
+- includeSubDomains usage if applicable
+
+#### Content-Security-Policy
+Assess:
+
+- presence
+- overly permissive policies
+- unsafe-inline or unsafe-eval usage
+- missing CSP entirely
+
+#### X-Frame-Options
+Evaluate clickjacking protection.
 
 #### X-Content-Type-Options
-- Is the header present with value `nosniff`?
-
-#### X-Frame-Options / CSP frame-ancestors
-- Is X-Frame-Options present with `DENY` or `SAMEORIGIN`?
-- Alternatively, is CSP `frame-ancestors` directive in use?
-- Assessment: Protected / Vulnerable to Clickjacking
+Check for `nosniff`.
 
 #### Referrer-Policy
-- Is Referrer-Policy present?
-- What is the value? (Recommended: `strict-origin-when-cross-origin` or stricter)
-- Could the current policy leak sensitive URL parameters to third parties?
+Check whether referrer exposure is controlled.
 
-#### Permissions-Policy (Feature-Policy)
-- Is Permissions-Policy present?
-- Does it restrict access to sensitive browser features (camera, microphone, geolocation) appropriately?
-
-#### Cache-Control
-- For authenticated or sensitive responses: is caching disabled? (`no-store`, `no-cache`)
-- Are there responses that should not be cached but are?
-
-#### CORS (Cross-Origin Resource Sharing)
-- What is the `Access-Control-Allow-Origin` value?
-- Is `Access-Control-Allow-Credentials: true` combined with a wildcard or overly broad origin? (Critical if so)
-- Is the origin allowlist restrictive?
-
-#### Additional Headers to Check
-- `X-Powered-By` — Should be absent (reveals server technology)
-- `Server` — Should be absent or generic (reveals server version)
-- `X-AspNet-Version` / `X-AspNetMvc-Version` — Should be absent
-
-### Step 4: TLS Review
-
-Using `tls-review-template.md`:
-
-#### Protocol Version
-- What TLS versions are supported? (TLS 1.3 recommended; TLS 1.2 acceptable; TLS 1.0/1.1 should be disabled)
-- Is SSLv3 disabled?
-
-#### Cipher Suites
-- Are weak cipher suites disabled? (RC4, DES, 3DES, NULL, EXPORT ciphers)
-- Are forward-secrecy cipher suites preferred? (ECDHE key exchange)
-- Are insecure renegotiation configurations present?
-
-#### Certificate
-- Who issued the certificate? (Trusted CA?)
-- What is the certificate validity period start and end date?
-- How many days until expiry?
-  - < 7 days: Critical — immediate renewal required
-  - 8–30 days: High — schedule renewal urgently
-  - 31–90 days: Medium — plan renewal
-  - > 90 days: OK
-- Is the certificate for the correct domain? (No mismatched CN or SAN)
-- Is the full certificate chain provided? (Intermediate certificates included)
-
-#### HSTS Preload
-- Is the domain on the HSTS preload list?
-- Is the preload directive present in the HSTS header?
-
-#### Mixed Content
-- Does the application load any HTTP resources from an HTTPS page?
-- Are there mixed content warnings observable?
-
-### Step 5: Document Findings
-
-For each missing or misconfigured header or TLS issue:
-- Record in findings register
-- Assign Finding ID
-- Rate severity per `.claude/rules/severity-rating-rules.md`
-- Reference evidence items (HTTP response captures, EVID- labeled)
+#### Permissions-Policy
+Check whether browser features are restricted where applicable.
 
 ---
 
-## Outputs
+### Step 5 — Cookie Protection Review
 
-| Output | Location | Template |
-|--------|----------|---------|
-| Headers checklist | `audit-runs/active/` | `headers-checklist.md` |
-| TLS review | `audit-runs/active/` | `tls-review-template.md` |
-| Findings | Findings register | Standard finding format |
-| Evidence items | `evidence/raw/` | EVID- convention |
+If cookie headers appear in evidence, check for:
+
+- Secure flag
+- HttpOnly flag
+- SameSite attribute
+
+If cookies cannot be observed, mark as **review gap**.
 
 ---
 
-## Tools Commonly Used for This Review
+### Step 6 — Server Information Exposure
 
-- Browser DevTools (Network tab) — inspect headers and certificate
-- `curl -I https://target.com` — request headers inspection
-- SSL Labs (ssllabs.com/ssltest) — comprehensive TLS grading
-- SecurityHeaders.com — header assessment
-- HSTS Preload (hstspreload.org) — preload status check
+Identify possible exposure such as:
+
+- `Server`
+- `X-Powered-By`
+- framework identifiers
+- version indicators
+
+Note that disclosure alone is not always a vulnerability but may increase reconnaissance value.
+
+---
+
+### Step 7 — Normalize Findings
+
+Use the normalized finding structure.
+
+Each finding should include:
+
+- title
+- domain (headers / transport)
+- severity
+- confidence
+- evidence
+- observation
+- risk
+- recommendation
+- acceptance criteria mapping
+- status
+- review type
+
+---
+
+### Step 8 — Update Findings Register
+
+Update the workspace findings register using:
+
+`.claude/templates/findings-register-template.md`
+
+Add:
+
+- confirmed header weaknesses
+- misconfiguration findings
+- review gaps
+
+Avoid duplicate findings.
+
+---
+
+### Step 9 — Update Working Audit Note
+
+Update the active audit note with:
+
+- summary of header posture
+- confirmed weaknesses
+- configuration observations
+- areas requiring further evidence
+
+---
+
+## Output
+
+This command should produce:
+
+1. Header security posture summary
+2. Structured findings for any issues
+3. Review gaps for areas lacking evidence
+4. Updates to the findings register
+5. Updates to the working audit note
+
+---
+
+## Guardrails
+
+- Do not assume header values without evidence.
+- Do not infer application behavior from header absence alone unless risk is clear.
+- Missing headers should be evaluated in context, not automatically treated as critical vulnerabilities.
+- If no header evidence exists, record a review gap instead of creating findings.

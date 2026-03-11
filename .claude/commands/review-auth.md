@@ -1,112 +1,194 @@
 # Command: /review-auth
 
-Focused review of authentication and access control. Loads the auth-access-audit skill and guides through a complete authentication mechanism review.
+## Objective
 
-## Trigger
+Review authentication mechanisms and login-related security controls for the target website.
 
-Invoked when the user wants to perform a targeted review of authentication controls. Can be run standalone or as part of a broader audit workflow.
+The goal is to identify weaknesses in authentication flow design, credential handling protections, and account protection mechanisms.
 
----
-
-## Pre-Conditions
-
-1. `.claude/context/audit-context.md` is populated and Authorization Status is **CONFIRMED**
-2. `.claude/context/scope.md` defines which auth endpoints and flows are in scope
+This review is **non-destructive** and evidence-based.
 
 ---
 
-## Steps
+## Required Inputs
 
-### Step 1: Context Load
+Read context:
 
-1. Read `.claude/context/audit-context.md` — confirm authorization
-2. Read `.claude/context/scope.md` — note which auth flows are in scope
-3. Read `.claude/context/target-profile.md` — note auth mechanism, identity provider, MFA status
-4. Read `.claude/rules/safety-authorization-rules.md` — confirm passive review mode unless active testing authorized
+- `.claude/context/audit-context.md`
+- `.claude/context/target-profile.md`
+- `.claude/context/scope.md`
+- `.claude/context/assumptions.md`
 
-### Step 2: Load Skill
+Apply rules:
 
-Load: `.claude/skills/auth-access-audit/SKILL.md`
+- `.claude/rules/evidence-quality-rules.md`
+- `.claude/rules/audit-scope-rules.md`
+- `.claude/rules/severity-rating-rules.md`
 
-Read:
-- `.claude/skills/auth-access-audit/templates/auth-checklist.md`
-- `.claude/skills/auth-access-audit/templates/auth-findings-template.md`
+Use skill:
 
-### Step 3: Authentication Mechanism Review
+- `.claude/skills/auth-access-audit/SKILL.md`
 
-Using `auth-checklist.md`, work through each control:
+Evidence sources:
 
-#### Login Mechanism
-- What authentication method is in use? (Username/password, SSO, OAuth, SAML)
-- Is HTTPS enforced on the login form and endpoint?
-- Are error messages differential (do they reveal whether username vs. password is wrong)?
-- Is there evidence of rate limiting on the login endpoint?
-- Is brute force protection in place (lockout, CAPTCHA, progressive delay)?
-
-#### Password Policy
-- What is the minimum password length?
-- Is there complexity enforcement?
-- Is there breach-checking against known leaked password lists (e.g., HaveIBeenPwned)?
-- Are there restrictions on password reuse?
-- What is the password expiry policy?
-
-#### Multi-Factor Authentication (MFA)
-- Is MFA available to users?
-- Is MFA enforced for privileged or admin accounts?
-- What MFA methods are supported? (TOTP, SMS, push, hardware key)
-- Can MFA be bypassed or disabled by the user without re-authentication?
-
-#### Account Lockout
-- After how many failed attempts is an account locked?
-- What is the lockout duration?
-- Can locked accounts be unlocked without additional verification?
-- Is there logging of lockout events?
-
-#### Password Reset Flow
-- How is identity verified during reset? (Email link, SMS code, security questions)
-- Are reset tokens single-use?
-- Do reset tokens expire, and within what timeframe?
-- Are prior sessions invalidated after a password reset?
-- Does the reset flow reveal whether an email address is registered (enumeration)?
-
-#### OAuth / SSO Configuration (if applicable)
-- Is the OAuth `state` parameter in use to prevent CSRF?
-- Is the redirect URI validated against a strict allowlist?
-- Is the identity provider's token validated properly?
-- Are OAuth tokens stored securely (not in localStorage without additional controls)?
-
-#### Credential Storage Indicators
-- Are there any observable indicators of how credentials are stored? (e.g., password hash in API response, timing differences suggesting bcrypt)
-- Is any credential or token observable in URL parameters?
-
-### Step 4: Document Findings
-
-For each issue identified, complete `auth-findings-template.md`:
-
-- Assign a Finding ID
-- Rate severity per `.claude/rules/severity-rating-rules.md`
-- Reference evidence items (EVID- convention)
-- Include a specific recommendation
-
-### Step 5: Session Initiation Review
-
-- After authentication, is the session token or JWT newly generated? (No session fixation)
-- Is the session token transmitted securely?
-- Note session token characteristics for the session-jwt-audit review
+- `evidence/raw/`
+- `evidence/reviewed/`
+- `evidence/summarized/`
 
 ---
 
-## Outputs
+## Review Scope
 
-| Output | Location | Template |
-|--------|----------|---------|
-| Authentication findings | `audit-runs/active/` or findings register | `auth-findings-template.md` |
-| Auth checklist record | `audit-runs/active/` | `auth-checklist.md` |
-| Evidence items | `evidence/raw/` | EVID- convention |
+Evaluate authentication posture including:
+
+- login endpoints
+- password policies (if visible)
+- account lockout behavior
+- MFA presence indicators
+- password reset flow
+- session establishment indicators
 
 ---
 
-## Related Commands
+## Audit Method
 
-- `/review-rbac` — Follow up with RBAC review after auth review
-- `/review-auth` combines naturally with `/audit-website` step 3.2
+### Step 1 — Identify Authentication Entry Points
+
+From context and evidence, identify:
+
+- login pages
+- admin login endpoints
+- authentication APIs
+- SSO integrations if visible
+
+If none are visible, record review gap.
+
+---
+
+### Step 2 — Evaluate Login Protection
+
+Look for evidence of:
+
+- login attempt throttling
+- account lockout mechanisms
+- captcha usage
+- anomaly detection indicators
+
+If evidence does not exist, record review gap.
+
+---
+
+### Step 3 — Evaluate MFA Presence
+
+Determine if:
+
+- multi-factor authentication exists
+- MFA is optional or mandatory
+- privileged roles require stronger authentication
+
+If no evidence exists, classify as review gap.
+
+---
+
+### Step 4 — Evaluate Password Reset Mechanism
+
+Assess visible evidence of reset flows:
+
+- token-based reset
+- email verification
+- secure reset process
+
+Identify risky behaviors if visible such as:
+
+- predictable reset tokens
+- insecure reset links
+- excessive information disclosure
+
+---
+
+### Step 5 — Evaluate Session Handling Indicators
+
+Where evidence exists, review:
+
+- session cookie attributes
+- session lifetime hints
+- logout behavior
+- session invalidation indicators
+
+---
+
+### Step 6 — Identify Authentication Risk Patterns
+
+Look for indicators of:
+
+- weak account protection
+- credential stuffing exposure
+- lack of MFA
+- insecure reset workflows
+- session mismanagement
+
+Only confirm issues if evidence supports them.
+
+---
+
+### Step 7 — Normalize Findings
+
+Use standardized finding format.
+
+Each finding must include:
+
+- title
+- domain (authentication)
+- severity
+- confidence
+- evidence
+- observation
+- risk
+- recommendation
+- acceptance criteria mapping
+- status
+- review type
+
+---
+
+### Step 8 — Update Findings Register
+
+Add findings and review gaps to the findings register.
+
+Ensure:
+
+- no duplicates
+- clear severity justification
+- explicit evidence references
+
+---
+
+### Step 9 — Update Working Audit Note
+
+Document:
+
+- authentication posture summary
+- observed strengths
+- weaknesses
+- review gaps
+- evidence limitations
+
+---
+
+## Output
+
+This command should produce:
+
+1. Authentication security posture summary
+2. Structured findings if issues exist
+3. Review gaps where visibility is insufficient
+4. Updated findings register
+5. Updated audit working note
+
+---
+
+## Guardrails
+
+- Do not assume authentication behavior without evidence.
+- Do not claim credential attacks or brute-force weaknesses without testing evidence.
+- Missing MFA visibility should be marked as review gap rather than confirmed failure.

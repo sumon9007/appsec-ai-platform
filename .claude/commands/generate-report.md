@@ -1,115 +1,253 @@
-# Command: /generate-report
+# Command: /review-headers
 
-Generate a security audit report from the active findings. Produces both an executive summary and a technical report.
+## Objective
 
-## Trigger
+Review browser-facing security headers and HTTPS posture for the target website.
 
-Invoked when the user wants to produce a formal security report from collected findings. Can be run at any point during or after an audit.
+This command evaluates the application's visible HTTP response headers and transport security indicators to identify security weaknesses, misconfigurations, or missing protections.
 
----
-
-## Pre-Conditions
-
-1. At least one finding is recorded in the findings register
-2. All findings have evidence references (EVID- labels)
-3. `.claude/context/audit-context.md` is populated for engagement metadata
+This review is **non-destructive** and based only on available evidence.
 
 ---
 
-## Steps
+## Required Inputs
 
-### Step 1: Load Report Writer Skill
+Read context first:
 
-Load: `.claude/skills/report-writer/SKILL.md`
+- `.claude/context/audit-context.md`
+- `.claude/context/target-profile.md`
+- `.claude/context/scope.md`
 
-Read all templates:
-- `.claude/skills/report-writer/templates/executive-summary-template.md`
-- `.claude/skills/report-writer/templates/technical-report-template.md`
+Apply rules:
 
-Read reporting standards:
-- `.claude/docs/reporting-standard.md`
-- `.claude/rules/reporting-rules.md`
+- `.claude/rules/audit-scope-rules.md`
+- `.claude/rules/evidence-quality-rules.md`
 - `.claude/rules/severity-rating-rules.md`
+- `.claude/rules/safety-authorization-rules.md`
 
-### Step 2: Read All Active Findings
+Use skill:
 
-1. Read the current findings register
-2. Read all individual finding records in `audit-runs/active/` or `audit-runs/completed/`
-3. Compile: total findings by severity (Critical, High, Medium, Low, Info)
-4. Identify: top 3–5 most impactful findings for the executive summary
-5. Confirm: every finding has a severity label, evidence reference, and recommendation
+- `.claude/skills/headers-tls-audit/SKILL.md`
 
-If any finding is missing required fields, flag it before proceeding.
+Evidence sources:
 
-### Step 3: Apply Severity Ratings Review
-
-- Review each finding's severity against `.claude/rules/severity-rating-rules.md`
-- Confirm no severity label deviates from the defined vocabulary
-- If any finding severity appears inconsistent with the criteria, note it for review
-- Do not change severity without documented justification
-
-### Step 4: Draft Executive Summary
-
-Using `executive-summary-template.md`:
-
-1. Populate engagement overview: target, scope, audit period, auditor
-2. Write findings summary: count by severity
-3. Summarize top risks in plain, non-technical language (2–3 sentences per top finding)
-4. State the overall security posture in a single clear sentence
-5. List 3–5 recommended priorities (non-technical, outcome-focused)
-6. Review: no HTTP headers, code samples, CVE numbers, or technical jargon
-
-Save draft to: `reports/draft/YYYY-MM-DD-[type]-executive-summary.md`
-
-### Step 5: Draft Technical Report
-
-Using `technical-report-template.md`:
-
-1. Populate cover page fields (engagement name, date, version, classification)
-2. Write methodology section — how was the audit conducted, which domains covered, tools used
-3. Populate the findings summary table (all findings: ID, title, severity, domain, status)
-4. Write a full finding detail section for each finding:
-   - Finding ID, title, severity, domain
-   - Description of the vulnerability
-   - Evidence references (EVID- labels)
-   - Impact assessment
-   - Recommendation with actionable remediation steps
-   - References (CWE, OWASP, CVE as applicable)
-5. Populate appendices: tool outputs, configuration extracts, methodology notes
-
-Save draft to: `reports/draft/YYYY-MM-DD-[type]-technical-report.md`
-
-### Step 6: Quality Review
-
-Before finalizing, verify:
-
-- [ ] All findings are included in both the executive summary (summarized) and technical report (full detail)
-- [ ] No finding is missing an evidence reference
-- [ ] No finding lacks a recommendation
-- [ ] Executive summary contains no technical jargon or raw evidence
-- [ ] Technical report contains exact EVID- references for all findings
-- [ ] Report filename follows `YYYY-MM-DD-[type]-report.md` convention
-- [ ] Overall posture statement is present in executive summary
-- [ ] Report version is labeled (e.g., "DRAFT v0.1")
-
-### Step 7: Promote to Final (When Approved)
-
-After review and sign-off by the security lead:
-1. Copy from `reports/draft/` to `reports/final/`
-2. Update version label to "Final"
-3. Record final report path in `.claude/context/audit-context.md` under Audit Session Log
+- `evidence/raw/`
+- `evidence/reviewed/`
+- `evidence/summarized/`
 
 ---
 
-## Outputs
+## Review Scope
 
-| Output | Location | Template |
-|--------|----------|---------|
-| Executive summary (draft) | `reports/draft/YYYY-MM-DD-[type]-executive-summary.md` | `executive-summary-template.md` |
-| Technical report (draft) | `reports/draft/YYYY-MM-DD-[type]-technical-report.md` | `technical-report-template.md` |
+This review focuses on browser security controls visible through HTTP responses.
+
+Primary areas include:
+
+### Transport Security
+- HTTPS enforcement
+- HSTS usage
+- mixed content exposure indicators
+
+### Response Security Headers
+
+Evaluate presence and configuration of:
+
+- `Strict-Transport-Security`
+- `Content-Security-Policy`
+- `X-Frame-Options`
+- `X-Content-Type-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+
+### Cookie Security Indicators
+
+Where visible:
+
+- `Secure`
+- `HttpOnly`
+- `SameSite`
+
+### Server Information Exposure
+
+Evaluate response headers for:
+
+- server identification
+- framework disclosure
+- version leakage
 
 ---
 
-## Related Commands
+## Audit Method
 
-- `/generate-remediation-plan` — Generate a prioritized remediation plan from the findings register
+### Step 1 — Read Context
+
+Determine:
+
+- target website URL
+- scope boundaries
+- allowed testing posture
+- known architecture hints
+
+If only public evidence exists, limit conclusions accordingly.
+
+---
+
+### Step 2 — Review Available Evidence
+
+Search the evidence folders for:
+
+- captured HTTP headers
+- browser developer console outputs
+- scanner results
+- curl responses
+- screenshots showing headers
+
+Summarize:
+
+- what headers are visible
+- which controls exist
+- which controls are missing
+- which controls appear weak or misconfigured
+
+---
+
+### Step 3 — Analyze Transport Security
+
+Assess:
+
+- HTTPS usage consistency
+- redirect from HTTP to HTTPS
+- HSTS presence
+- potential downgrade exposure
+
+Classify results as:
+
+- confirmed control
+- suspected weakness
+- review gap
+
+---
+
+### Step 4 — Analyze Response Headers
+
+Evaluate each key header.
+
+#### Strict-Transport-Security
+Check:
+
+- header presence
+- reasonable max-age
+- includeSubDomains usage if applicable
+
+#### Content-Security-Policy
+Assess:
+
+- presence
+- overly permissive policies
+- unsafe-inline or unsafe-eval usage
+- missing CSP entirely
+
+#### X-Frame-Options
+Evaluate clickjacking protection.
+
+#### X-Content-Type-Options
+Check for `nosniff`.
+
+#### Referrer-Policy
+Check whether referrer exposure is controlled.
+
+#### Permissions-Policy
+Check whether browser features are restricted where applicable.
+
+---
+
+### Step 5 — Cookie Protection Review
+
+If cookie headers appear in evidence, check for:
+
+- Secure flag
+- HttpOnly flag
+- SameSite attribute
+
+If cookies cannot be observed, mark as **review gap**.
+
+---
+
+### Step 6 — Server Information Exposure
+
+Identify possible exposure such as:
+
+- `Server`
+- `X-Powered-By`
+- framework identifiers
+- version indicators
+
+Note that disclosure alone is not always a vulnerability but may increase reconnaissance value.
+
+---
+
+### Step 7 — Normalize Findings
+
+Use the normalized finding structure.
+
+Each finding should include:
+
+- title
+- domain (headers / transport)
+- severity
+- confidence
+- evidence
+- observation
+- risk
+- recommendation
+- acceptance criteria mapping
+- status
+- review type
+
+---
+
+### Step 8 — Update Findings Register
+
+Update the workspace findings register using:
+
+`.claude/templates/findings-register-template.md`
+
+Add:
+
+- confirmed header weaknesses
+- misconfiguration findings
+- review gaps
+
+Avoid duplicate findings.
+
+---
+
+### Step 9 — Update Working Audit Note
+
+Update the active audit note with:
+
+- summary of header posture
+- confirmed weaknesses
+- configuration observations
+- areas requiring further evidence
+
+---
+
+## Output
+
+This command should produce:
+
+1. Header security posture summary
+2. Structured findings for any issues
+3. Review gaps for areas lacking evidence
+4. Updates to the findings register
+5. Updates to the working audit note
+
+---
+
+## Guardrails
+
+- Do not assume header values without evidence.
+- Do not infer application behavior from header absence alone unless risk is clear.
+- Missing headers should be evaluated in context, not automatically treated as critical vulnerabilities.
+- If no header evidence exists, record a review gap instead of creating findings.
