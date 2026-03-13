@@ -145,6 +145,14 @@ To publish it, enable GitHub Pages in the repository settings and select **GitHu
 
 ---
 
+## Coverage Matrix
+
+For a current view of what this platform does and does not yet cover against common web application security testing expectations, see:
+
+- `docs/coverage-matrix.md`
+
+---
+
 ## Versioning and History
 
 - Store completed audit outputs in `audits/[cadence]/YYYY-MM-DD-[type].md`
