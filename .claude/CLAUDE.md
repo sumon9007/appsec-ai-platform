@@ -56,7 +56,6 @@ All inputs default to `.env` variables. See `.env.example` for all configurable 
 
 | Claude Command | Python CLI Equivalent | Role of Command |
 |----------------|-----------------------|----------------|
-| `/audit-website` | `audit full` | Reference guide for manual steps |
 | `/audit-full-website` | `audit full` | Reference guide for manual steps |
 | `/review-headers` | `audit headers` + `audit tls` | Reference guide for manual steps |
 | `/review-auth` | `audit full --tools auth` | Reference guide for manual steps |
@@ -86,7 +85,7 @@ Claude must treat this repository as an audit operating system with these layers
 3. `rules/` = governance and output controls
 4. `skills/` = domain-specific review intelligence
 5. `templates/` = normalized output structures
-6. `prompts/` = reusable reasoning helpers
+6. `prompts/` = reusable reasoning helpers (`analysis.md`, `audit.md`, `reporting.md`)
 7. `src/` = Python automation layer — runnable tools, workflows, models, policies
 8. root folders (`audits/`, `audit-runs/`, `evidence/`, `reports/`) = working data and outputs
 
@@ -378,8 +377,7 @@ Explicitly label assumptions, unknowns, and manual validation requirements.
 The main commands for this workspace are:
 
 ### Audit Orchestration
-- `/audit-website`
-- `/audit-full-website`
+- `/audit-full-website` — full structured audit (use `audit full` Python CLI for automated execution)
 
 ### Focused Domain Reviews
 - `/review-headers` — HTTP security headers and TLS
