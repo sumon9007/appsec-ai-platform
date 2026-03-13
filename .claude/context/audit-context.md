@@ -8,12 +8,12 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Field | Value |
 |-------|-------|
-| Audit Name | [PLACEHOLDER — e.g., "Q1 2026 Security Audit — Acme Web App"] |
-| Audit ID | [PLACEHOLDER — e.g., AUDIT-2026-001] |
-| Audit Date / Period | [PLACEHOLDER — e.g., 2026-03-01 to 2026-03-15] |
-| Auditor Name(s) | [PLACEHOLDER] |
-| Auditor Organization | [PLACEHOLDER] |
-| Report Recipient(s) | [PLACEHOLDER] |
+| Audit Name | Passive Security Headers and TLS Review - diversifiedrobotic.com |
+| Audit ID | AUDIT-2026-DR-001 |
+| Audit Date / Period | 2026-03-13 |
+| Auditor Name(s) | User-authorized review executed via Codex workspace |
+| Auditor Organization | Independent review in local workspace |
+| Report Recipient(s) | Authorized requester |
 
 ---
 
@@ -21,9 +21,9 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Field | Value |
 |-------|-------|
-| Target Application Name | [PLACEHOLDER] |
-| Target URL(s) | [PLACEHOLDER — e.g., https://app.example.com] |
-| Environment | [PLACEHOLDER — e.g., Production / Staging / QA] |
+| Target Application Name | Diversified Robotic |
+| Target URL(s) | https://diversifiedrobotic.com/ |
+| Environment | Production |
 
 ---
 
@@ -33,11 +33,11 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Field | Value |
 |-------|-------|
-| Authorization Status | [PLACEHOLDER — CONFIRMED / PENDING / NOT CONFIRMED] |
-| Authorized By | [PLACEHOLDER — Name and title of authorizing party] |
-| Authorization Date | [PLACEHOLDER] |
-| Authorization Reference | [PLACEHOLDER — e.g., email reference, signed document ID, ticket number] |
-| Scope of Authorization | [PLACEHOLDER — e.g., "Passive review only" / "Active testing permitted on staging only"] |
+| Authorization Status | CONFIRMED |
+| Authorized By | Requester with written authorization confirmed in chat |
+| Authorization Date | 2026-03-13 |
+| Authorization Reference | User statement in current session: written authorization confirmed |
+| Scope of Authorization | Passive review only |
 
 > **Note:** If Authorization Status is not CONFIRMED, Claude Code will halt all audit activity and request confirmation before proceeding.
 
@@ -47,9 +47,9 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Field | Value |
 |-------|-------|
-| Audit Type | [PLACEHOLDER — e.g., Full Website Audit / Weekly Check / Pre-Release Gate / Annual Review] |
-| Audit Cadence | [PLACEHOLDER — One-off / Weekly / Monthly / Quarterly / Release / Annual] |
-| Trigger | [PLACEHOLDER — e.g., Scheduled / Release v2.4.0 / Incident follow-up] |
+| Audit Type | Focused passive website review |
+| Audit Cadence | One-off |
+| Trigger | User-requested quick web test |
 
 ---
 
@@ -57,11 +57,11 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Field | Value |
 |-------|-------|
-| Prior Audit Reference | [PLACEHOLDER — Reference to previous audit, if any] |
-| Outstanding Findings from Prior Audit | [PLACEHOLDER — Count or list reference] |
-| Known Changes Since Last Audit | [PLACEHOLDER — New features, infra changes, etc.] |
-| Special Instructions | [PLACEHOLDER — Any client-specific requirements or constraints] |
-| Testing Window | [PLACEHOLDER — e.g., "Weekdays 09:00–17:00 UTC only"] |
+| Prior Audit Reference | [UNKNOWN] |
+| Outstanding Findings from Prior Audit | [UNKNOWN] |
+| Known Changes Since Last Audit | [UNKNOWN] |
+| Special Instructions | Passive review only; no active exploitation or intrusive testing |
+| Testing Window | 2026-03-13 during current session |
 
 ---
 
@@ -69,10 +69,10 @@ Complete this file before beginning any audit. Claude Code will read this file a
 
 | Role | Name | Contact |
 |------|------|---------|
-| Primary Point of Contact | [PLACEHOLDER] | [PLACEHOLDER] |
-| Technical Lead | [PLACEHOLDER] | [PLACEHOLDER] |
-| Security Lead | [PLACEHOLDER] | [PLACEHOLDER] |
-| Escalation Contact | [PLACEHOLDER] | [PLACEHOLDER] |
+| Primary Point of Contact | [UNKNOWN] | [UNKNOWN] |
+| Technical Lead | [UNKNOWN] | [UNKNOWN] |
+| Security Lead | [UNKNOWN] | [UNKNOWN] |
+| Escalation Contact | [UNKNOWN] | [UNKNOWN] |
 
 ---
 
@@ -82,8 +82,8 @@ Record each audit session started under this engagement:
 
 | Session Date | Domain(s) Covered | Auditor | Session File |
 |--------------|-------------------|---------|-------------|
-| [DATE] | [DOMAIN] | [AUDITOR] | [PATH to session file] |
+| 2026-03-13 | Security Headers and TLS | Codex workspace runner | audit-runs/active/2026-03-13-passive-web-session.md |
 
 ---
 
-*Last updated: [PLACEHOLDER — Date this file was last modified]*
+*Last updated: 2026-03-13*

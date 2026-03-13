@@ -12,26 +12,21 @@ Defines the exact boundaries of the audit. Claude Code will enforce these bounda
 
 | URL / Domain | Environment | Notes |
 |--------------|-------------|-------|
-| [PLACEHOLDER — e.g., https://app.example.com] | [e.g., Production] | [e.g., Primary application] |
-| [PLACEHOLDER — e.g., https://api.example.com] | [e.g., Production] | [e.g., REST API] |
-| [PLACEHOLDER — e.g., https://staging.example.com] | [e.g., Staging] | [e.g., Active testing permitted] |
+| https://diversifiedrobotic.com/ | Production | Primary public website; passive review only |
 
 ### In-Scope Endpoints
 
 | Endpoint | Method(s) | Notes |
 |----------|-----------|-------|
-| [PLACEHOLDER — e.g., /api/v1/*] | [e.g., GET, POST, PUT, DELETE] | [e.g., Full API surface] |
-| [PLACEHOLDER — e.g., /auth/*] | [e.g., GET, POST] | [e.g., Authentication flows] |
-| [PLACEHOLDER — e.g., /admin/*] | [e.g., GET, POST] | [e.g., Admin panel] |
+| / | GET | Homepage passive response review |
+| /blog | GET | Public content review if observed passively |
+| /evolve | GET | Public content review if observed passively |
 
 ### In-Scope Features
 
-- [PLACEHOLDER — e.g., User registration and login]
-- [PLACEHOLDER — e.g., Password reset flow]
-- [PLACEHOLDER — e.g., User profile management]
-- [PLACEHOLDER — e.g., File upload functionality]
-- [PLACEHOLDER — e.g., Admin dashboard]
-- [PLACEHOLDER — e.g., API key management]
+- Public website responses and transport configuration
+- Security headers and TLS posture
+- Publicly accessible pages linked from the main site
 
 ---
 
@@ -43,22 +38,20 @@ Defines the exact boundaries of the audit. Claude Code will enforce these bounda
 
 | URL / Domain | Reason for Exclusion |
 |--------------|---------------------|
-| [PLACEHOLDER — e.g., https://thirdparty.example.com] | [e.g., Not owned by client] |
-| [PLACEHOLDER — e.g., https://legacy.example.com] | [e.g., Scheduled for decommission, separate engagement] |
+| Third-party embedded services | Not owned by target unless explicitly authorized |
 
 ### Out-of-Scope Features
 
-- [PLACEHOLDER — e.g., Third-party payment processor UI (Stripe-hosted pages)]
-- [PLACEHOLDER — e.g., CDN infrastructure]
-- [PLACEHOLDER — e.g., Corporate network and internal systems]
-- [PLACEHOLDER — e.g., Mobile applications (separate engagement)]
+- Third-party chat/coprocessor services embedded by iframe
+- Corporate network, internal systems, and non-public applications
+- Source code review and authenticated-only functionality
 
 ### Out-of-Scope Testing Techniques
 
-- [PLACEHOLDER — e.g., Social engineering]
-- [PLACEHOLDER — e.g., Physical security testing]
-- [PLACEHOLDER — e.g., Denial of service testing]
-- [PLACEHOLDER — e.g., Active exploitation on production (passive review only)]
+- Social engineering
+- Physical security testing
+- Denial of service testing
+- Active exploitation, fuzzing, brute force, or intrusive scanning
 
 ---
 
@@ -66,11 +59,11 @@ Defines the exact boundaries of the audit. Claude Code will enforce these bounda
 
 | Boundary | Constraint |
 |----------|-----------|
-| Active Testing Environment | [PLACEHOLDER — e.g., Staging only / Production read-only] |
-| Testing Window | [PLACEHOLDER — e.g., Weekdays 09:00–17:00 UTC] |
-| Rate Limit Awareness | [PLACEHOLDER — e.g., Do not trigger rate limits on production] |
-| Data Creation | [PLACEHOLDER — e.g., Use test accounts only; delete test data after] |
-| Credential Usage | [PLACEHOLDER — e.g., Use only provided test credentials] |
+| Active Testing Environment | None authorized |
+| Testing Window | Current session on 2026-03-13 |
+| Rate Limit Awareness | Passive requests only; avoid high-volume access |
+| Data Creation | No data creation permitted |
+| Credential Usage | No credentials used in this review |
 
 ---
 
@@ -78,9 +71,7 @@ Defines the exact boundaries of the audit. Claude Code will enforce these bounda
 
 | Account Role | Username / Email | Notes |
 |--------------|-----------------|-------|
-| [PLACEHOLDER — e.g., Admin] | [PLACEHOLDER] | [e.g., Full admin privileges] |
-| [PLACEHOLDER — e.g., Standard User] | [PLACEHOLDER] | [e.g., Typical user account] |
-| [PLACEHOLDER — e.g., Read-Only] | [PLACEHOLDER] | [e.g., Read-only role] |
+| None provided | N/A | Passive public-site review only |
 
 > Credentials are stored separately and must not be recorded in this document.
 
@@ -90,10 +81,10 @@ Defines the exact boundaries of the audit. Claude Code will enforce these bounda
 
 | Constraint | Detail |
 |------------|--------|
-| Audit Start Date | [PLACEHOLDER] |
-| Audit End Date | [PLACEHOLDER] |
-| Report Due Date | [PLACEHOLDER] |
-| Total Allocated Time | [PLACEHOLDER — e.g., 40 hours] |
+| Audit Start Date | 2026-03-13 |
+| Audit End Date | 2026-03-13 |
+| Report Due Date | 2026-03-13 |
+| Total Allocated Time | Short focused review |
 
 ---
 
@@ -109,8 +100,8 @@ Any changes to scope during the engagement must be:
 
 | Date | Change Description | Authorized By | Reference |
 |------|-------------------|---------------|-----------|
-| [DATE] | [CHANGE] | [AUTHORIZER] | [REFERENCE] |
+| 2026-03-13 | Initial passive-review scope recorded for diversifiedrobotic.com | Requester | User authorization statement in current session |
 
 ---
 
-*Last updated: [PLACEHOLDER — Date]*
+*Last updated: 2026-03-13*

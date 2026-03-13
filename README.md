@@ -19,14 +19,14 @@ This workspace provides a repeatable, evidence-based framework for security audi
 
 ### 1. Set Up Context
 
-Before running any audit, populate the context files:
+Before running any audit, populate the `.claude/context/` files:
 
 | File | What to Fill In |
 |------|----------------|
-| `context/audit-context.md` | Audit name, date, authorization confirmation |
-| `context/target-profile.md` | Application name, tech stack, roles |
-| `context/scope.md` | In-scope URLs, out-of-scope exclusions |
-| `context/assumptions.md` | Unknowns and assumptions going in |
+| `.claude/context/audit-context.md` | Audit name, date, authorization confirmation |
+| `.claude/context/target-profile.md` | Application name, tech stack, roles |
+| `.claude/context/scope.md` | In-scope URLs, out-of-scope exclusions |
+| `.claude/context/assumptions.md` | Unknowns and assumptions going in |
 
 ### 2. Choose Your Audit Command
 
@@ -61,13 +61,16 @@ Use these commands to drill into specific domains:
 ```
 ./
 ├── README.md                   # This file
-├── CLAUDE.md                   # Instructions for Claude Code
-├── context/                    # Audit-specific context (fill before starting)
-├── docs/                       # Reference documentation and standards
-├── commands/                   # Slash command definitions
-├── skills/                     # Audit skill modules with templates
-├── rules/                      # Enforced rules for scope, evidence, reporting
-├── templates/                  # Reusable output templates
+├── .claude/                    # Claude workspace operating model
+│   ├── CLAUDE.md               # Instructions for Claude Code
+│   ├── context/                # Audit-specific context (fill before starting)
+│   ├── docs/                   # Reference documentation and standards
+│   ├── commands/               # Slash command definitions
+│   ├── skills/                 # Audit skill modules with templates
+│   ├── rules/                  # Enforced rules for scope, evidence, reporting
+│   └── templates/              # Reusable output templates
+├── scripts/                    # Runnable CLI wrappers
+├── src/                        # Python automation and workflows
 ├── audits/                     # Completed audit outputs by cadence
 │   ├── weekly/
 │   ├── monthly/
@@ -102,12 +105,43 @@ Use these commands to drill into specific domains:
 
 | Document | Purpose |
 |----------|---------|
-| `docs/audit-domains.md` | Domains covered and key risks per domain |
-| `docs/audit-frequencies.md` | What each audit cadence covers |
-| `docs/acceptance-criteria.md` | What "passing" looks like per domain |
-| `docs/evidence-standard.md` | Evidence labeling and storage conventions |
-| `docs/reporting-standard.md` | Report structure and severity vocabulary |
-| `docs/remediation-standard.md` | SLAs and remediation requirements |
+| `.claude/docs/audit-domains.md` | Domains covered and key risks per domain |
+| `.claude/docs/audit-frequencies.md` | What each audit cadence covers |
+| `.claude/docs/acceptance-criteria.md` | What "passing" looks like per domain |
+| `.claude/docs/evidence-standard.md` | Evidence labeling and storage conventions |
+| `.claude/docs/reporting-standard.md` | Report structure and severity vocabulary |
+| `.claude/docs/remediation-standard.md` | SLAs and remediation requirements |
+
+---
+
+## Runnable Workflow
+
+The first executable workflow currently implemented is a passive Security Headers and TLS review.
+
+Run it with an explicit target:
+
+```bash
+python scripts/run_audit.py audit headers-tls --url https://app.example.com --auditor "Your Name"
+```
+
+Or let the runner read in-scope targets from `.claude/context/scope.md`:
+
+```bash
+python scripts/run_audit.py audit headers-tls
+```
+
+---
+
+## Reports Portal
+
+This repository includes a GitHub Pages report portal generated from the Markdown files in `reports/draft/` and `reports/final/`.
+
+- Local build: `python3 scripts/build_reports_site.py`
+- Generated output: `site/`
+- Published path on GitHub Pages: `/reports/`
+- Deployment workflow: `.github/workflows/deploy-reports-pages.yml`
+
+To publish it, enable GitHub Pages in the repository settings and select **GitHub Actions** as the source.
 
 ---
 

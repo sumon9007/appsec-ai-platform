@@ -19,11 +19,11 @@ Documents assumptions made at the start of the engagement and unknowns to be val
 
 | ID | Assumption | Basis | Status | Impact if Wrong |
 |----|-----------|-------|--------|----------------|
-| ASSUM-001 | [PLACEHOLDER — e.g., The application uses HTTPS exclusively in production] | [e.g., Client stated] | [ASSUMED / VALIDATED / INVALIDATED] | [e.g., Transport security findings may be inaccurate] |
-| ASSUM-002 | [PLACEHOLDER — e.g., All user-facing forms perform server-side validation] | [e.g., Assumed standard practice] | [ASSUMED] | [e.g., Input validation findings may be incomplete] |
-| ASSUM-003 | [PLACEHOLDER — e.g., The admin panel is only accessible from internal IP ranges] | [e.g., Client documentation] | [ASSUMED] | [e.g., Admin exposure risk may be underestimated] |
-| ASSUM-004 | [PLACEHOLDER — e.g., Test accounts have equivalent functionality to real accounts] | [e.g., Client confirmed] | [ASSUMED] | [e.g., RBAC test results may not reflect production behavior] |
-| ASSUM-005 | [PLACEHOLDER] | [PLACEHOLDER] | [ASSUMED] | [PLACEHOLDER] |
+| ASSUM-001 | The public site is representative of the production deployment seen by end users | Passive observation of public domain | ASSUMED | Header and transport findings may not reflect all environments |
+| ASSUM-002 | The site is built with Next.js or closely related React tooling | Passive observation of response headers and client assets | ASSUMED | Technology-specific observations could be inaccurate |
+| ASSUM-003 | No authenticated application area was assessed in this engagement | Scope and lack of credentials | VALIDATED | Auth/session findings remain out of scope |
+| ASSUM-004 | The embedded chatbot service is third-party managed and out of direct scope | Passive observation of iframe to Copilot Studio | ASSUMED | Embedded third-party risk may need separate review |
+| ASSUM-005 | Public pages tested were sufficient for a quick passive headers/TLS review | User requested quick web test | ASSUMED | Broader page coverage could reveal additional header differences |
 
 ---
 
@@ -31,9 +31,9 @@ Documents assumptions made at the start of the engagement and unknowns to be val
 
 | ID | Assumption | Basis | Status | Impact if Wrong |
 |----|-----------|-------|--------|----------------|
-| ASSUM-ENV-001 | [PLACEHOLDER — e.g., Staging environment mirrors production configuration] | [e.g., Client stated] | [ASSUMED] | [e.g., Findings on staging may not apply to production] |
-| ASSUM-ENV-002 | [PLACEHOLDER — e.g., Third-party integrations are not in scope] | [e.g., Scope agreement] | [VALIDATED] | [e.g., N/A — confirmed out of scope] |
-| ASSUM-ENV-003 | [PLACEHOLDER] | [PLACEHOLDER] | [ASSUMED] | [PLACEHOLDER] |
+| ASSUM-ENV-001 | The assessed hostname serves production traffic | Public DNS and user-provided target URL | ASSUMED | Environment classification in the report may be inaccurate |
+| ASSUM-ENV-002 | Third-party integrations are not in scope for active review | Scope agreement | VALIDATED | N/A - confirmed out of scope |
+| ASSUM-ENV-003 | No CDN/WAF-specific behavior materially altered the passive findings observed | Limited passive sample set | ASSUMED | Some controls might be applied conditionally by edge infrastructure |
 
 ---
 
@@ -43,11 +43,11 @@ Items that are explicitly unknown and require validation or acknowledgment befor
 
 | ID | Unknown | Why It Matters | Resolution Plan | Status |
 |----|---------|---------------|-----------------|--------|
-| UNK-001 | [PLACEHOLDER — e.g., Complete list of API endpoints] | [e.g., Cannot assess full attack surface without it] | [e.g., Request API documentation from client] | [UNKNOWN / RESOLVED] |
-| UNK-002 | [PLACEHOLDER — e.g., Whether logging is centralized or per-service] | [e.g., Affects logging audit methodology] | [e.g., Ask technical lead] | [UNKNOWN] |
-| UNK-003 | [PLACEHOLDER — e.g., Password hashing algorithm used] | [e.g., Affects credential security assessment] | [e.g., Review source code or ask developer] | [UNKNOWN] |
-| UNK-004 | [PLACEHOLDER — e.g., Whether MFA is enforced for all admin accounts] | [e.g., Critical for admin access risk rating] | [e.g., Test with provided admin test account] | [UNKNOWN] |
-| UNK-005 | [PLACEHOLDER] | [PLACEHOLDER] | [PLACEHOLDER] | [UNKNOWN] |
+| UNK-001 | Complete application and API attack surface beyond public pages | Limits the breadth of findings and page-to-page comparison | Request fuller scope or sitemap from target team | UNKNOWN |
+| UNK-002 | Hosting provider, WAF, and deployment architecture | Affects hardening and infrastructure interpretation | Ask technical contact or review architecture docs | UNKNOWN |
+| UNK-003 | Whether headers differ on authenticated or dynamic endpoints | Controls may be inconsistent across the site | Re-test with broader approved page set | UNKNOWN |
+| UNK-004 | Whether a formal CSP is applied selectively on other routes or through non-header mechanisms | Could reduce confidence in site-wide CSP absence | Review additional routes or server config | UNKNOWN |
+| UNK-005 | Internal ownership and remediation workflow for the target | Needed for action tracking and SLA assignment | Confirm with requester | UNKNOWN |
 
 ---
 
@@ -57,12 +57,9 @@ Items that require action or information from the target application team to com
 
 | Item | Owner | Requested Date | Received Date | Notes |
 |------|-------|---------------|---------------|-------|
-| [PLACEHOLDER — e.g., API documentation / OpenAPI spec] | [PLACEHOLDER — e.g., Backend team] | [DATE] | [DATE or PENDING] | [PLACEHOLDER] |
-| [PLACEHOLDER — e.g., Architecture diagram] | [PLACEHOLDER] | [DATE] | [PENDING] | [PLACEHOLDER] |
-| [PLACEHOLDER — e.g., Test account credentials] | [PLACEHOLDER] | [DATE] | [DATE] | [PLACEHOLDER] |
-| [PLACEHOLDER — e.g., Recent dependency manifest (package.json / requirements.txt)] | [PLACEHOLDER] | [DATE] | [PENDING] | [PLACEHOLDER] |
-| [PLACEHOLDER — e.g., Log sample from past 30 days] | [PLACEHOLDER] | [DATE] | [PENDING] | [PLACEHOLDER] |
-| [PLACEHOLDER — e.g., Previous audit report or pen test findings] | [PLACEHOLDER] | [DATE] | [PENDING] | [PLACEHOLDER] |
+| Technical point of contact details | Requester | 2026-03-13 | PENDING | Needed for fuller report metadata |
+| Architecture and hosting details | Requester | 2026-03-13 | PENDING | Would improve confidence in deployment observations |
+| Previous audit report or baseline | Requester | 2026-03-13 | PENDING | Would allow trend comparison |
 
 ---
 
@@ -72,8 +69,8 @@ Record when assumptions are validated or invalidated during the audit:
 
 | Date | Assumption / Unknown ID | Validated By | New Status | Notes |
 |------|------------------------|-------------|------------|-------|
-| [DATE] | [ID] | [AUDITOR] | [VALIDATED / INVALIDATED] | [NOTES] |
+| 2026-03-13 | ASSUM-003 | Auditor | VALIDATED | Review remained passive and did not use credentials |
 
 ---
 
-*Last updated: [PLACEHOLDER — Date]*
+*Last updated: 2026-03-13*

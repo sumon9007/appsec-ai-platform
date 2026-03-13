@@ -3,3 +3,29 @@ Thumbs.db
 .idea/
 .vscode/
 *.log
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment — never commit secrets
+.env
+
+# Token caches and certificates
+token_cache*
+*.pfx
+*.pem
+*.key
+
+# Audit outputs — tracked separately, not via git by default
+output/
+site/
