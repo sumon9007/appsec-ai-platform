@@ -151,12 +151,12 @@ def _write_reports_index(reports: Iterable[ReportPage]) -> None:
         <div>
           <p class="eyebrow">AppSec AI Platform</p>
           <h1>Reports Portal</h1>
-          <p class="lede">A polished GitHub Pages view for audit drafts, final reports, and supporting delivery artifacts.</p>
+          <p class="lede">A polished GitHub Pages view for audit drafts, final reports, and supporting delivery artifacts, restyled to align with the Diversified Robotic visual language.</p>
         </div>
         <div class="sidebar-panel">
           <p class="panel-label">Theme</p>
-          <p class="panel-value">Steel Ledger</p>
-          <p class="panel-note">Warm paper surfaces, navy signal accents, sharp tables, and dossier-style spacing for security reporting.</p>
+          <p class="panel-value">Diversified Night</p>
+          <p class="panel-note">Dark gradient surfaces, electric blue accents, and glass-like panels adapted from the public site styling.</p>
         </div>
         <div class="sidebar-panel">
           <p class="panel-label">Published Sets</p>
