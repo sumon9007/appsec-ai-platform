@@ -301,15 +301,27 @@ Explicitly label assumptions, unknowns, and manual validation requirements.
 
 The main commands for this workspace are:
 
+### Audit Orchestration
 - `/audit-website`
 - `/audit-full-website`
+
+### Focused Domain Reviews
 - `/review-headers`
 - `/review-auth`
+- `/review-session`
 - `/review-rbac`
+- `/review-input-validation`
+- `/review-misconfig`
 - `/review-logging`
 - `/review-dependencies`
+
+### Reporting and Remediation
 - `/generate-report`
 - `/generate-remediation-plan`
+
+### Session and Findings Lifecycle
+- `/start-session`
+- `/close-finding`
 
 Claude should favor these commands over ad hoc workflows.
 
