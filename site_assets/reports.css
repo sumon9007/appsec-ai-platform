@@ -160,7 +160,7 @@ h4 {
 
 .page-header > div,
 .report-hero > div {
-  max-width: 780px;
+  max-width: 920px;
 }
 
 .sidebar h1 {
@@ -257,6 +257,7 @@ h4 {
 .report-card h4 {
   font-size: 1.35rem;
   line-height: 1.15;
+  max-width: 22ch;
 }
 
 .card-topline,
@@ -499,12 +500,28 @@ h4 {
 @media (min-width: 1081px) {
   .lede,
   .page-copy,
-  .summary,
   .panel-note,
   .markdown-body p,
   .markdown-body li {
     text-align: justify;
     text-justify: inter-word;
+  }
+
+  .summary {
+    text-align: left;
+  }
+
+  .card-meta dd,
+  .card-meta dt,
+  .hero-meta dd,
+  .hero-meta dt,
+  .search-box,
+  .page-header h2,
+  .report-hero h1,
+  .report-card h4,
+  .section-heading h3,
+  .section-heading .eyebrow {
+    text-align: left;
   }
 
   .search-box {
