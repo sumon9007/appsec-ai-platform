@@ -1,3 +1,7 @@
+> **Reference Guide** — This skill documents the methodology. For automated execution, run:
+> `python scripts/run_audit.py audit full --tools misconfig`
+> Use this skill to interpret tool output, conduct manual review steps, or guide authorized active testing.
+
 # Skill: Security Misconfiguration Audit
 
 ## Purpose

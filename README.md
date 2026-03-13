@@ -12,6 +12,7 @@ This workspace provides a repeatable, evidence-based framework for security audi
 - Reusable audit skills with checklists and finding templates
 - Strict rules for scope, evidence quality, reporting, and authorization
 - Templates for every output artifact — plans, sessions, findings, reports
+- A Python automation layer for runnable passive, authenticated, and active testing workflows
 
 ---
 
@@ -33,6 +34,7 @@ Before running any audit, populate the `.claude/context/` files:
 | Command | Use When |
 |---------|----------|
 | `/audit-website` | Full audit of a website or web application |
+| `/audit-full-website` | Comprehensive full-domain audit with all checks |
 | `/audit-weekly` | Weekly quick check (headers, auth, CVEs) |
 | `/audit-monthly` | Monthly broader review |
 | `/audit-quarterly` | Deep quarterly audit of all domains |
@@ -44,7 +46,10 @@ Before running any audit, populate the `.claude/context/` files:
 Use these commands to drill into specific domains:
 
 - `/review-auth` — Authentication and access control
+- `/review-session` — Session management and JWT security
 - `/review-rbac` — Role-based access control and IDOR
+- `/review-input-validation` — Input validation and injection risks
+- `/review-misconfig` — Security misconfiguration
 - `/review-logging` — Logging and monitoring coverage
 - `/review-dependencies` — Dependency and supply chain review
 - `/review-headers` — HTTP security headers and TLS
@@ -69,8 +74,24 @@ Use these commands to drill into specific domains:
 │   ├── skills/                 # Audit skill modules with templates
 │   ├── rules/                  # Enforced rules for scope, evidence, reporting
 │   └── templates/              # Reusable output templates
+├── docs/                       # Platform documentation and roadmap
+│   ├── coverage-matrix.md      # Current capability coverage vs OWASP WSTG/ASVS
+│   └── full-platform-roadmap.md
 ├── scripts/                    # Runnable CLI wrappers
 ├── src/                        # Python automation and workflows
+│   ├── auth/                   # Credential store and auth lifecycle
+│   ├── cli.py                  # CLI entrypoint
+│   ├── config/                 # Configuration loading
+│   ├── models/                 # Typed entities (Target, Finding, Evidence, etc.)
+│   ├── parsers/                # Cookie, JWT, HTML, OpenAPI, manifest parsers
+│   ├── policies/               # Authorization and stop-condition enforcement
+│   ├── reporting/              # Executive/technical/remediation report generation
+│   ├── session/                # Session manager and authenticated request handling
+│   ├── storage/                # Run-state persistence
+│   ├── tools/                  # Domain-specific audit tools
+│   ├── utils/                  # Context reader, evidence writer, findings writer
+│   └── workflows/              # Orchestration — passive and full audit workflows
+├── tests/                      # Unit and integration tests
 ├── audits/                     # Completed audit outputs by cadence
 │   ├── weekly/
 │   ├── monthly/
@@ -101,33 +122,60 @@ Use these commands to drill into specific domains:
 
 ---
 
-## Reference Documents
+## Python Automation Layer
 
-| Document | Purpose |
-|----------|---------|
-| `.claude/docs/audit-domains.md` | Domains covered and key risks per domain |
-| `.claude/docs/audit-frequencies.md` | What each audit cadence covers |
-| `.claude/docs/acceptance-criteria.md` | What "passing" looks like per domain |
-| `.claude/docs/evidence-standard.md` | Evidence labeling and storage conventions |
-| `.claude/docs/reporting-standard.md` | Report structure and severity vocabulary |
-| `.claude/docs/remediation-standard.md` | SLAs and remediation requirements |
+The platform includes a growing Python automation layer for executable audit workflows.
 
----
+### Current Tools (`src/tools/`)
 
-## Runnable Workflow
+| Tool | Domain |
+|------|--------|
+| `headers_audit.py` | HTTP security headers |
+| `tls_audit.py` | TLS and certificate review |
+| `crawler.py` | Public route and endpoint discovery |
+| `cookie_audit.py` | Cookie attribute and security review |
+| `session_jwt_audit.py` | Session and JWT passive analysis |
+| `dependency_audit.py` | Dependency manifest and CVE review |
+| `misconfig_audit.py` | Security misconfiguration checks |
+| `auth_audit.py` | Authentication flow review |
+| `rbac_audit.py` | RBAC and IDOR review |
+| `input_validation_audit.py` | Input validation and injection checks |
+| `api_audit.py` | API security assessment |
+| `secrets_scan.py` | Secrets and credential scanning |
 
-The first executable workflow currently implemented is a passive Security Headers and TLS review.
+### Platform Modules
 
-Run it with an explicit target:
+| Module | Purpose |
+|--------|---------|
+| `src/models/entities.py` | Typed core entities (Target, Finding, Evidence, AuditRun) |
+| `src/storage/run_store.py` | Run-state persistence |
+| `src/policies/authorization.py` | Authorization mode enforcement |
+| `src/policies/stop_conditions.py` | Safety stop conditions |
+| `src/parsers/` | Cookie, JWT, HTML, OpenAPI, manifest parsers |
+| `src/auth/credential_store.py` | Secure test credential handling |
+| `src/session/session_manager.py` | Authenticated session management |
+| `src/reporting/report_generator.py` | Report generation |
+| `src/workflows/passive_web_audit.py` | Passive audit workflow orchestration |
+| `src/workflows/full_audit.py` | Full multi-domain audit orchestration |
+
+### Running Audits
+
+Run a passive headers and TLS audit:
 
 ```bash
 python scripts/run_audit.py audit headers-tls --url https://app.example.com --auditor "Your Name"
 ```
 
-Or let the runner read in-scope targets from `.claude/context/scope.md`:
+Run a full passive audit against all in-scope targets from context:
 
 ```bash
-python scripts/run_audit.py audit headers-tls
+python scripts/run_audit.py audit passive
+```
+
+Run the full multi-domain audit workflow:
+
+```bash
+python scripts/run_audit.py audit full --url https://app.example.com --auditor "Your Name"
 ```
 
 ---
@@ -145,11 +193,28 @@ To publish it, enable GitHub Pages in the repository settings and select **GitHu
 
 ---
 
-## Coverage Matrix
+## Coverage
 
-For a current view of what this platform does and does not yet cover against common web application security testing expectations, see:
+For the current capability coverage against OWASP WSTG and ASVS, see:
 
-- `docs/coverage-matrix.md`
+- [docs/coverage-matrix.md](docs/coverage-matrix.md)
+
+For the full build roadmap and phased delivery plan, see:
+
+- [docs/full-platform-roadmap.md](docs/full-platform-roadmap.md)
+
+---
+
+## Reference Documents
+
+| Document | Purpose |
+|----------|---------|
+| `.claude/docs/audit-domains.md` | Domains covered and key risks per domain |
+| `.claude/docs/audit-frequencies.md` | What each audit cadence covers |
+| `.claude/docs/acceptance-criteria.md` | What "passing" looks like per domain |
+| `.claude/docs/evidence-standard.md` | Evidence labeling and storage conventions |
+| `.claude/docs/reporting-standard.md` | Report structure and severity vocabulary |
+| `.claude/docs/remediation-standard.md` | SLAs and remediation requirements |
 
 ---
 

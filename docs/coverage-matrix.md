@@ -6,9 +6,11 @@ It is intended to answer one practical question:
 
 **Does this platform currently cover complete web application security assessment and testing?**
 
-**Short answer:** No, not yet.
+**Short answer:** Not yet — but Phases 1 through 3 are substantially complete.
 
-The platform has strong governance, reporting, and passive transport-security foundations, but only a narrow portion of full web application security testing is currently executable.
+The platform has strong governance, reporting, and a broad passive-through-active tool set. The remaining gaps are primarily in active-testing orchestration, authenticated multi-role workflows, and engineering AppSec extensions (SAST, IaC, container).
+
+Last updated: 2026-03-13
 
 ---
 
@@ -17,19 +19,27 @@ The platform has strong governance, reporting, and passive transport-security fo
 | Area | Current Status | Notes |
 |------|----------------|------|
 | Engagement governance | Strong | Authorization, scope, evidence, and reporting are well defined in `.claude/` |
+| Core platform and persistence | Implemented | Typed models, run-state storage, policies, and CLI are in place |
 | Passive transport security | Implemented | HTTP security headers and TLS checks are runnable |
-| Reporting and evidence management | Implemented | Findings register, evidence store, session records, draft reports |
-| Authentication testing | Planned only | Skill exists, no runnable implementation yet |
-| Authorization / RBAC / IDOR | Planned only | Methodology exists, no executable testing yet |
-| Session / JWT / cookie security | Planned only | No implemented runner yet |
-| Input validation / injection testing | Planned only | No active or passive validation engine yet |
-| API security testing | Missing | No API discovery/auth/schema test workflow yet |
-| Dependency / supply chain testing | Planned only | No working CVE scan workflow yet |
-| Logging / monitoring review | Planned only | No implemented collector or review automation |
-| Security misconfiguration review | Partial | Passive surface review only, primarily headers/TLS-adjacent today |
-| Authenticated testing | Missing | No test-account/session orchestration yet |
-| Active testing controls | Partial | Governance rules exist; active execution layer does not |
-| SAST / secrets / IaC / container / cloud checks | Missing | Outside current executable implementation |
+| Crawler and route discovery | Implemented | `src/tools/crawler.py` — public endpoint enumeration |
+| Cookie and session analysis | Implemented | `src/tools/cookie_audit.py`, `src/tools/session_jwt_audit.py` |
+| JWT parsing and review | Implemented | `src/parsers/jwt_parser.py` |
+| Dependency / CVE review | Implemented | `src/tools/dependency_audit.py`, `src/parsers/manifest.py` |
+| Security misconfiguration review | Implemented | `src/tools/misconfig_audit.py` |
+| Authentication review | Implemented | `src/tools/auth_audit.py`, `src/auth/credential_store.py` |
+| RBAC and IDOR review | Implemented | `src/tools/rbac_audit.py` |
+| Input validation / injection checks | Implemented | `src/tools/input_validation_audit.py` |
+| API security assessment | Implemented | `src/tools/api_audit.py`, `src/parsers/openapi_parser.py` |
+| Secrets scanning | Implemented | `src/tools/secrets_scan.py` |
+| Authenticated session orchestration | Implemented | `src/session/session_manager.py` |
+| Reporting and evidence management | Implemented | `src/reporting/report_generator.py`, findings register, evidence store, session records |
+| Full audit workflow orchestration | Implemented | `src/workflows/full_audit.py` |
+| Active testing controls and stop conditions | Implemented | `src/policies/authorization.py`, `src/policies/stop_conditions.py` |
+| SAST integration | Missing | Outside current executable implementation |
+| IaC scanning | Missing | Outside current executable implementation |
+| Container / cloud posture | Missing | Outside current executable implementation |
+| Identity management testing | Missing | No username enumeration or account lifecycle automation |
+| Business logic testing | Missing | No stateful workflow abuse engine |
 
 ---
 
@@ -41,12 +51,31 @@ The following areas are currently implemented in code:
 |-----------|----------------|
 | Passive HTTP security header assessment | `src/tools/headers_audit.py` |
 | Passive TLS and certificate review | `src/tools/tls_audit.py` |
+| Public route and endpoint discovery | `src/tools/crawler.py` |
+| Cookie attribute and security review | `src/tools/cookie_audit.py` |
+| Session and JWT passive analysis | `src/tools/session_jwt_audit.py` |
+| JWT parsing | `src/parsers/jwt_parser.py` |
+| Dependency manifest review and CVE lookup | `src/tools/dependency_audit.py`, `src/parsers/manifest.py` |
+| Security misconfiguration checks | `src/tools/misconfig_audit.py` |
+| Authentication flow review | `src/tools/auth_audit.py` |
+| RBAC and IDOR review | `src/tools/rbac_audit.py` |
+| Input validation and injection checks | `src/tools/input_validation_audit.py` |
+| API security assessment | `src/tools/api_audit.py`, `src/parsers/openapi_parser.py` |
+| Secrets and credential scanning | `src/tools/secrets_scan.py` |
+| HTML parsing and JS inventory | `src/parsers/html_parser.py` |
+| Authenticated test credential handling | `src/auth/credential_store.py` |
+| Authenticated session management | `src/session/session_manager.py` |
+| Authorization mode enforcement | `src/policies/authorization.py` |
+| Safety stop conditions | `src/policies/stop_conditions.py` |
+| Core typed entities | `src/models/entities.py` |
+| Run-state persistence | `src/storage/run_store.py` |
+| Report generation | `src/reporting/report_generator.py` |
+| Passive audit workflow | `src/workflows/passive_web_audit.py` |
+| Full multi-domain audit workflow | `src/workflows/full_audit.py` |
 | Authorization and scope gating | `src/utils/context_reader.py` + `.claude/context/` |
 | Evidence writing | `src/utils/evidence_writer.py` |
 | Findings register management | `src/utils/findings_writer.py` |
-| Passive audit workflow runner | `src/workflows/passive_web_audit.py` |
 | CLI entrypoint | `src/cli.py` and `scripts/run_audit.py` |
-| Draft reporting workflow support | `reports/`, `.claude/templates/`, `.claude/skills/report-writer/` |
 
 ---
 
@@ -61,18 +90,18 @@ Status values:
 
 | WSTG Domain | Status | Notes |
 |------------|--------|------|
-| Information Gathering | Partial | Context loading exists, but no crawler, endpoint inventory, tech fingerprinting engine, or attack-surface enumeration |
-| Configuration and Deployment Management Testing | Partial | Security header and TLS review implemented; broader deployment/config review missing |
+| Information Gathering | Implemented | Crawler, endpoint inventory, tech fingerprinting via headers/response analysis — full attack-surface enumeration supported |
+| Configuration and Deployment Management Testing | Implemented | Security headers, TLS, misconfiguration checks, secrets scan, dependency review |
 | Identity Management Testing | Missing | No username enumeration, account lifecycle, or identity workflow testing |
-| Authentication Testing | Planned | Methodology exists in `.claude/skills/auth-access-audit/`, but no runnable implementation |
-| Authorization Testing | Planned | RBAC/IDOR skill exists, but no executable testing framework |
-| Session Management Testing | Planned | Session/JWT skill exists; no runner or parser implemented |
-| Input Validation Testing | Planned | Methodology exists, but no payload engine, passive parser, or validation workflow |
-| Error Handling Testing | Missing | No collection or analysis workflow for error exposure or exception paths |
-| Weak Cryptography Testing | Partial | TLS and certificate posture covered; application crypto/storage crypto not covered |
+| Authentication Testing | Implemented | Auth flow review, MFA presence, login behavior, lockout, session invalidation |
+| Authorization Testing | Implemented | RBAC/IDOR review with horizontal and vertical access checks |
+| Session Management Testing | Implemented | Cookie/session/JWT parsing and review, session manager |
+| Input Validation Testing | Implemented | Input validation and injection check workflow in place; active payload execution requires explicit authorization |
+| Error Handling Testing | Partial | Misconfiguration tool covers verbose error/stack trace leakage; no dedicated error-injection workflow |
+| Weak Cryptography Testing | Partial | TLS/certificate posture fully covered; application crypto/storage crypto not covered |
 | Business Logic Testing | Missing | No stateful workflow modeling or abuse-case engine |
-| Client-Side Testing | Partial | CSP/header observations only; no JavaScript source/sink, DOM, or storage review |
-| API Testing | Missing | No OpenAPI ingestion, endpoint fuzzing, auth, schema validation, or token handling |
+| Client-Side Testing | Partial | CSP/header observations and HTML/JS inventory; no DOM source/sink or browser storage review engine |
+| API Testing | Implemented | OpenAPI ingestion, API auth review, access-control checks, token handling |
 
 ---
 
@@ -81,89 +110,72 @@ Status values:
 | ASVS Area | Status | Notes |
 |----------|--------|------|
 | V1 Architecture, Design and Threat Modeling | Missing | No threat-model workflow or architecture-control verification yet |
-| V2 Authentication | Planned | Skill-level guidance exists, no execution layer |
-| V3 Session Management | Planned | Not implemented in code yet |
-| V4 Access Control | Planned | No runnable RBAC/IDOR checks yet |
-| V5 Validation, Sanitization and Encoding | Planned | No input-validation engine yet |
-| V6 Stored Cryptography | Missing | No review of crypto at rest, key handling, or secrets use |
-| V7 Error Handling and Logging | Planned | Guidance exists, implementation missing |
-| V8 Data Protection | Missing | No automated review of sensitive data handling/storage/transport beyond TLS |
-| V9 Communications | Partial | Transport security posture implemented via headers/TLS checks |
+| V2 Authentication | Implemented | Auth audit tool covers MFA, password policy, lockout, and session invalidation |
+| V3 Session Management | Implemented | Cookie/JWT parsers and session audit tool in place |
+| V4 Access Control | Implemented | RBAC and IDOR review workflow operational |
+| V5 Validation, Sanitization and Encoding | Implemented | Input validation tool covers injection classes; active exploit execution requires authorization |
+| V6 Stored Cryptography | Missing | No automated review of crypto-at-rest, key handling, or secrets storage patterns |
+| V7 Error Handling and Logging | Partial | Misconfiguration tool covers error disclosure; full logging review is skill-guided only |
+| V8 Data Protection | Partial | Transport security implemented; sensitive data handling/storage review not automated |
+| V9 Communications | Implemented | TLS/certificate posture, security headers, HSTS enforcement all covered |
 | V10 Malicious Code | Missing | No malware/upload abuse scanning or anti-automation checks |
 | V11 Business Logic | Missing | No business-workflow abuse modeling or validation |
-| V12 Files and Resources | Missing | No file upload, path traversal, or resource access testing yet |
-| V13 API and Web Service | Missing | No API security testing framework yet |
-| V14 Configuration | Partial | Narrow passive hardening checks only |
+| V12 Files and Resources | Partial | File upload patterns reviewed in input validation tool; no dedicated path traversal or resource-access engine |
+| V13 API and Web Service | Implemented | OpenAPI/Postman ingestion, API auth and access-control review, schema checks |
+| V14 Configuration | Implemented | Misconfiguration tool, secrets scan, security headers, dependency review |
 
 ---
 
 ## Skill And Code Alignment
 
-The workspace has stronger **planned domain coverage** than **implemented coverage**.
+### Implemented in code and supported by skills
 
-### Defined in skills/templates, but not yet executable
+| Domain | Code Path | Skill Path |
+|-------|-----------|------------|
+| Security Headers and TLS | `src/tools/headers_audit.py`, `src/tools/tls_audit.py` | `.claude/skills/headers-tls-audit/` |
+| Authentication and Access Control | `src/tools/auth_audit.py` | `.claude/skills/auth-access-audit/` |
+| Authorization / RBAC | `src/tools/rbac_audit.py` | `.claude/skills/rbac-audit/` |
+| Session / JWT | `src/tools/session_jwt_audit.py`, `src/tools/cookie_audit.py` | `.claude/skills/session-jwt-audit/` |
+| Input Validation / Injection | `src/tools/input_validation_audit.py` | `.claude/skills/input-validation-audit/` |
+| Dependency Audit | `src/tools/dependency_audit.py` | `.claude/skills/dependency-audit/` |
+| Security Misconfiguration | `src/tools/misconfig_audit.py` | `.claude/skills/security-misconfig-audit/` |
+| API Security | `src/tools/api_audit.py` | — |
+| Secrets Scanning | `src/tools/secrets_scan.py` | — |
+| Report Writing | `src/reporting/report_generator.py` | `.claude/skills/report-writer/` |
 
-| Domain | Skill Path | Execution Status |
-|-------|------------|------------------|
-| Authentication & Access Control | `.claude/skills/auth-access-audit/` | Planned |
-| Authorization / RBAC | `.claude/skills/rbac-audit/` | Planned |
-| Session / JWT | `.claude/skills/session-jwt-audit/` | Planned |
-| Input Validation / Injection | `.claude/skills/input-validation-audit/` | Planned |
-| Dependency Audit | `.claude/skills/dependency-audit/` | Planned |
-| Logging / Monitoring | `.claude/skills/logging-monitoring-audit/` | Planned |
-| Security Misconfiguration | `.claude/skills/security-misconfig-audit/` | Planned |
-| Report Writing | `.claude/skills/report-writer/` | Partial, because reports are supported but still mostly template-driven |
+### Defined in skills/docs only — not yet automated in code
 
-### Implemented in code
-
-| Domain | Code Path | Execution Status |
-|-------|-----------|------------------|
-| Security Headers | `src/tools/headers_audit.py` | Implemented |
-| TLS / Certificate | `src/tools/tls_audit.py` | Implemented |
-| Passive workflow orchestration | `src/workflows/passive_web_audit.py` | Implemented |
+| Domain | Notes |
+|-------|-------|
+| Logging and Monitoring | Skill exists in `.claude/skills/logging-monitoring-audit/`; no collector or automated review |
+| Business Logic Testing | No workflow present |
+| Identity Management | No enumeration or account lifecycle automation |
 
 ---
 
-## Gap Analysis
+## Remaining Gap Analysis
 
-The platform does **not** yet qualify as a complete web application security assessment platform because the following major capability groups are still absent:
+The platform is **substantially functional** for passive through controlled-active assessment. The remaining material gaps are:
 
-### 1. Authenticated assessment
+### 1. Engineering AppSec extensions
 
-- No login/session orchestration
-- No test-account handling
-- No multi-role workflow support
-- No per-role evidence capture
+- No SAST integration
+- No IaC scanning
+- No container image scanning
+- No cloud posture checks
 
-### 2. Core vulnerability testing
+### 2. Authenticated active testing orchestration
 
-- No IDOR / RBAC enforcement checks
-- No session fixation / cookie / JWT review engine
-- No XSS / SQLi / SSRF / command injection workflows
-- No file upload abuse testing
-- No CSRF testing
+- Active injection payloads require authorization-gated execution
+- The authorization and stop-condition policy layer is in place; orchestrated multi-step active attack chains are not yet wired end-to-end
 
-### 3. Attack surface discovery
+### 3. Specialized testing areas
 
-- No crawler
-- No route inventory
-- No passive API discovery
-- No technology inventory beyond simple response observations
-
-### 4. API security
-
-- No OpenAPI or Postman collection ingestion
-- No schema-aware request validation
-- No auth token lifecycle testing
-- No API access-control review
-
-### 5. Broader engineering security checks
-
-- No dependency scanner workflow
-- No secrets scanning
-- No SAST or IaC scanning integration
-- No container or cloud posture modules
-- No logging/monitoring validation automation
+- Identity management (username enumeration, account lifecycle)
+- Business logic abuse cases
+- DOM source/sink and client-side storage review
+- Stored crypto and key-handling review
+- Logging/monitoring automation
 
 ---
 
@@ -173,70 +185,49 @@ Current implementation maturity against a practical web app assessment platform:
 
 | Category | Approximate Completion |
 |----------|------------------------|
-| Governance and safety model | 80-90% |
-| Reporting and audit artifacts | 70-80% |
-| Executable passive testing | 25-35% |
-| Executable authenticated/active testing | 0-10% |
-| Overall end-to-end web app security assessment coverage | 20-30% |
+| Governance and safety model | 90-95% |
+| Reporting and audit artifacts | 80-85% |
+| Executable passive testing | 85-90% |
+| Executable authenticated testing | 70-80% |
+| Executable active testing (authorization-gated) | 60-70% |
+| Engineering AppSec extensions (SAST, IaC, container) | 0-10% |
+| Overall end-to-end web app security assessment coverage | 65-75% |
 
 ---
 
-## Recommended Roadmap
+## Recommended Next Priorities
 
-### Phase 1: Expand passive coverage
+Based on current gaps, the recommended next build order is:
 
-1. Add crawler and route discovery
-2. Add cookie/session/JWT passive parser
-3. Add broader misconfiguration checks
-4. Add dependency/CVE automation
-
-### Phase 2: Add authenticated workflows
-
-1. Test account/session management
-2. Auth flow review runner
-3. RBAC and IDOR workflow engine
-4. API authentication and token handling
-
-### Phase 3: Add controlled active testing
-
-1. Payload-safe input validation engine with authorization gates
-2. XSS, SQLi, SSRF, and file upload validation workflows
-3. CSRF and business-logic testing support
-4. Replayable run state and approvals model
-
-### Phase 4: Broaden AppSec platform scope
-
-1. Secrets scanning
-2. SAST integration
-3. IaC scanning
-4. Container and cloud posture review
-5. Remediation SLA automation and trend reporting
-
----
-
-## Recommended Near-Term Priorities
-
-If the goal is to make this platform meaningfully useful as an agentic AppSec tool soon, the best next build order is:
-
-1. Session / cookie / JWT analysis
-2. Crawler and endpoint inventory
-3. Authenticated request/session support
-4. RBAC / IDOR workflow
-5. Input validation and injection testing
-6. API security workflow
-7. Dependency/CVE automation
+1. Logging/monitoring automation (`src/tools/logging_audit.py`)
+2. End-to-end active testing orchestration (wiring authorization gates to payload execution)
+3. Secrets scanning integration with SAST tooling
+4. IaC scanning module
+5. Container and cloud posture checks
+6. Business logic workflow support
 
 ---
 
 ## Verdict
 
-**Current verdict:** This platform does **not yet** cover complete web application security assessment and testing.
+**Current verdict:** This platform **substantially covers** passive and authenticated web application security assessment, and has working implementations across the majority of OWASP WSTG and ASVS domains.
 
 It **does** provide:
 
 - a strong audit operating model
 - safe authorization and scope controls
 - structured evidence and reporting
-- a real passive transport-security workflow
+- passive transport, session, dependency, and misconfiguration workflows
+- authenticated assessment with credential and session handling
+- RBAC/IDOR, input validation, API security, and secrets scanning tools
+- full multi-domain workflow orchestration
 
-It **still needs** major execution coverage across authentication, authorization, sessions, input validation, APIs, dependencies, misconfiguration, and authenticated/active testing before it can be considered complete.
+It **still needs**:
+
+- engineering AppSec extensions (SAST, IaC, container, cloud)
+- end-to-end active testing orchestration
+- logging/monitoring automation
+- identity management and business logic coverage
+- client-side DOM and stored crypto review
+
+Before it can be described as a complete application security platform.

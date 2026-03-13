@@ -1,3 +1,6 @@
+> **Python CLI** (primary): `python scripts/run_audit.py report technical   # also: report executive`
+> This command file is a methodology reference. Run the Python CLI command above for automated execution.
+
 # Command: /review-headers
 
 ## Objective

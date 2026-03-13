@@ -1,3 +1,7 @@
+> **Reference Guide** — This skill documents the methodology. For automated execution, run:
+> `python scripts/run_audit.py audit dependencies --manifest requirements.txt`
+> Use this skill to interpret tool output, conduct manual review steps, or guide authorized active testing.
+
 # Skill: Dependency and Supply Chain Audit
 
 ## Purpose

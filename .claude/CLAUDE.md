@@ -11,12 +11,69 @@ It is designed to support:
 - consistent report generation
 - prioritized remediation planning
 
-This workspace is Markdown-first and environment-agnostic.
+This workspace has two execution layers:
 
-It is not:
+1. **Python automation layer** (`src/`) — the primary execution engine. Use Python CLI for all runnable audit tasks.
+2. **Claude intelligence layer** (`.claude/`) — governance, methodology, evidence standards, and human-assisted review.
+
+This workspace is not:
 - a generic exploit toolkit
 - a destructive testing framework
 - a place to invent evidence or overstate findings
+
+---
+
+## Python CLI Quick Reference
+
+The Python layer is the primary execution interface. Use these commands instead of running audit steps manually.
+
+```bash
+# Run full audit (reads AUDIT_TARGET_URLS from .env or use --url)
+python scripts/run_audit.py audit full
+
+# Domain-specific audits
+python scripts/run_audit.py audit headers
+python scripts/run_audit.py audit tls
+python scripts/run_audit.py audit cookies
+python scripts/run_audit.py audit session
+python scripts/run_audit.py audit misconfig
+python scripts/run_audit.py audit dependencies --manifest requirements.txt
+python scripts/run_audit.py audit secrets --scan src/
+python scripts/run_audit.py audit api --spec openapi.yaml
+
+# Generate reports from findings register
+python scripts/run_audit.py report technical
+python scripts/run_audit.py report executive
+python scripts/run_audit.py report remediation
+
+# Check authorization and scope status
+python scripts/run_audit.py session status
+```
+
+All inputs default to `.env` variables. See `.env.example` for all configurable options.
+
+### Command → Python CLI Mapping
+
+| Claude Command | Python CLI Equivalent | Role of Command |
+|----------------|-----------------------|----------------|
+| `/audit-website` | `audit full` | Reference guide for manual steps |
+| `/audit-full-website` | `audit full` | Reference guide for manual steps |
+| `/review-headers` | `audit headers` + `audit tls` | Reference guide for manual steps |
+| `/review-auth` | `audit full --tools auth` | Reference guide for manual steps |
+| `/review-session` | `audit full --tools session,cookies` | Reference guide for manual steps |
+| `/review-rbac` | `audit full --tools rbac` | Reference guide for manual steps |
+| `/review-input-validation` | `audit full --tools input` | Reference guide for manual steps |
+| `/review-misconfig` | `audit full --tools misconfig` | Reference guide for manual steps |
+| `/review-dependencies` | `audit dependencies` | Reference guide for manual steps |
+| `/generate-report` | `report technical` + `report executive` | Reference guide for manual steps |
+| `/generate-remediation-plan` | `report remediation` | Reference guide for manual steps |
+| `/audit-weekly` | (no direct equivalent) | Cadence orchestration — still useful |
+| `/audit-monthly` | (no direct equivalent) | Cadence orchestration — still useful |
+| `/audit-quarterly` | (no direct equivalent) | Cadence orchestration — still useful |
+| `/audit-release` | (no direct equivalent) | Release gate decision — still useful |
+| `/audit-annual` | (no direct equivalent) | Annual review — still useful |
+| `/start-session` | (no direct equivalent) | Session setup — still useful |
+| `/close-finding` | (no direct equivalent) | Finding lifecycle — still useful |
 
 ---
 
@@ -30,9 +87,28 @@ Claude must treat this repository as an audit operating system with these layers
 4. `skills/` = domain-specific review intelligence
 5. `templates/` = normalized output structures
 6. `prompts/` = reusable reasoning helpers
-7. root folders (`audits/`, `audit-runs/`, `evidence/`, `reports/`) = working data and outputs
+7. `src/` = Python automation layer — runnable tools, workflows, models, policies
+8. root folders (`audits/`, `audit-runs/`, `evidence/`, `reports/`) = working data and outputs
 
 Claude must always work from this model.
+
+### Python Automation Layer (`src/`)
+
+The repository has a growing Python execution layer. Claude should be aware of the following module responsibilities:
+
+| Module | Responsibility |
+|--------|---------------|
+| `src/models/entities.py` | Typed core entities: Target, AuditRun, Finding, Evidence, ControlCheck, ReviewGap |
+| `src/storage/run_store.py` | Run-state persistence for resumable workflows |
+| `src/policies/authorization.py` | Authorization mode enforcement (passive / active) |
+| `src/policies/stop_conditions.py` | Safety stop conditions — halt on sensitive data discovery |
+| `src/parsers/` | Cookie, JWT, HTML, OpenAPI, manifest parsers |
+| `src/auth/credential_store.py` | Secure test credential handling |
+| `src/session/session_manager.py` | Authenticated session management |
+| `src/reporting/report_generator.py` | Structured report generation |
+| `src/tools/` | Domain-specific audit tools (one per assessment domain) |
+| `src/workflows/` | Orchestration — passive and full audit workflow runners |
+| `src/utils/` | Context reader, evidence writer, findings writer |
 
 ---
 
@@ -306,14 +382,14 @@ The main commands for this workspace are:
 - `/audit-full-website`
 
 ### Focused Domain Reviews
-- `/review-headers`
-- `/review-auth`
-- `/review-session`
-- `/review-rbac`
-- `/review-input-validation`
-- `/review-misconfig`
-- `/review-logging`
-- `/review-dependencies`
+- `/review-headers` — HTTP security headers and TLS
+- `/review-auth` — Authentication and access control
+- `/review-session` — Session management and JWT security
+- `/review-rbac` — Role-based access control and IDOR
+- `/review-input-validation` — Input validation and injection risks
+- `/review-misconfig` — Security misconfiguration
+- `/review-logging` — Logging and monitoring coverage
+- `/review-dependencies` — Dependency and supply chain review
 
 ### Reporting and Remediation
 - `/generate-report`

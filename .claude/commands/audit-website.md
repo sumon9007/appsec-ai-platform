@@ -1,3 +1,6 @@
+> **Python CLI** (primary): `python scripts/run_audit.py audit full`
+> This command file is a methodology reference. Run the Python CLI command above for automated execution.
+
 # Command: /audit-website
 
 Full security audit of a website or web application, covering all audit domains in sequence.

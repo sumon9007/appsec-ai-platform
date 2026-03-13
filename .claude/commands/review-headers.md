@@ -1,3 +1,6 @@
+> **Python CLI** (primary): `python scripts/run_audit.py audit headers   # or: audit tls, audit cookies`
+> This command file is a methodology reference. Run the Python CLI command above for automated execution.
+
 # Command: /review-headers
 
 ## Objective

@@ -1,3 +1,7 @@
+> **Reference Guide** — This skill documents the methodology. For automated execution, run:
+> `python scripts/run_audit.py audit headers   # and: audit tls`
+> Use this skill to interpret tool output, conduct manual review steps, or guide authorized active testing.
+
 # Skill: HTTP Security Headers and TLS Audit
 
 ## Purpose

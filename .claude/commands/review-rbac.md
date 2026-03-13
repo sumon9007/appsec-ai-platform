@@ -1,3 +1,6 @@
+> **Python CLI** (primary): `python scripts/run_audit.py audit full --tools rbac`
+> This command file is a methodology reference. Run the Python CLI command above for automated execution.
+
 # Command: /review-rbac
 
 Focused review of role-based access control and authorization. Loads the rbac-audit skill and guides through role definitions, permission matrix verification, IDOR surface assessment, and privilege escalation path analysis.

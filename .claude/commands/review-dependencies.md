@@ -1,3 +1,6 @@
+> **Python CLI** (primary): `python scripts/run_audit.py audit dependencies --manifest requirements.txt`
+> This command file is a methodology reference. Run the Python CLI command above for automated execution.
+
 # Command: /review-dependencies
 
 Focused review of third-party dependencies for known CVEs, abandoned packages, license risks, and supply chain concerns.
