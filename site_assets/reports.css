@@ -104,7 +104,7 @@ pre,
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  align-items: end;
+  align-items: flex-start;
 }
 
 .page-header {
@@ -150,18 +150,26 @@ h4 {
 }
 
 .sidebar h1,
-.page-header h2,
-.report-hero h1 {
-  max-width: 12ch;
-}
-
-.sidebar h1,
 .report-hero h1 {
   font-size: clamp(2.2rem, 4vw, 4.5rem);
 }
 
 .page-header h2 {
   font-size: clamp(2rem, 3.5vw, 3.4rem);
+}
+
+.page-header > div,
+.report-hero > div {
+  max-width: 780px;
+}
+
+.sidebar h1 {
+  max-width: 10ch;
+}
+
+.page-header h2,
+.report-hero h1 {
+  max-width: none;
 }
 
 .lede,
@@ -348,6 +356,14 @@ h4 {
   color: #dbe5f0;
 }
 
+.markdown-body p {
+  margin: 0 0 1rem;
+}
+
+.markdown-body li + li {
+  margin-top: 0.35rem;
+}
+
 .markdown-body ul,
 .markdown-body ol {
   padding-left: 1.4rem;
@@ -477,6 +493,22 @@ h4 {
   .page-header h2,
   .report-hero h1 {
     max-width: none;
+  }
+}
+
+@media (min-width: 1081px) {
+  .lede,
+  .page-copy,
+  .summary,
+  .panel-note,
+  .markdown-body p,
+  .markdown-body li {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  .search-box {
+    align-self: flex-start;
   }
 }
 
