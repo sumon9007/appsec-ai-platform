@@ -318,22 +318,41 @@ def report() -> None:
     """Generate audit reports from the findings register."""
 
 
+_format_option = click.option(
+    "--format", "output_format",
+    type=click.Choice(["md", "html"], case_sensitive=False),
+    default="md",
+    show_default=True,
+    help="Output format: md (Markdown) or html (self-contained HTML).",
+)
+
+
 @report.command("technical")
 @click.option("--register", "register_path", type=click.Path(path_type=Path),
               default=None, help="Path to findings register. Falls back to AUDIT_REGISTER_PATH env var.")
 @click.option("--target", "target_name", default=None, help="Target application name. Falls back to AUDIT_TARGET_NAME env var.")
 @click.option("--auditor", default=None, help="Auditor name. Falls back to AUDIT_DEFAULT_AUDITOR env var.")
 @click.option("--version", default=None, help="Report version label. Falls back to AUDIT_REPORT_VERSION env var.")
-def report_technical(register_path, target_name, auditor, version):
+@_format_option
+def report_technical(register_path, target_name, auditor, version, output_format):
     """Generate a draft technical security report."""
-    from src.reporting.report_generator import generate_technical_report
     reg = register_path or _settings.DEFAULT_REGISTER_PATH
-    path = generate_technical_report(
-        reg,
-        target_name=target_name or _settings.DEFAULT_TARGET_NAME,
-        auditor=auditor or _settings.DEFAULT_AUDITOR,
-        version=version or _settings.DEFAULT_REPORT_VERSION,
-    )
+    if output_format == "html":
+        from src.reporting.html_report_generator import generate_technical_report_html
+        path = generate_technical_report_html(
+            reg,
+            target_name=target_name or _settings.DEFAULT_TARGET_NAME,
+            auditor=auditor or _settings.DEFAULT_AUDITOR,
+            version=version or _settings.DEFAULT_REPORT_VERSION,
+        )
+    else:
+        from src.reporting.report_generator import generate_technical_report
+        path = generate_technical_report(
+            reg,
+            target_name=target_name or _settings.DEFAULT_TARGET_NAME,
+            auditor=auditor or _settings.DEFAULT_AUDITOR,
+            version=version or _settings.DEFAULT_REPORT_VERSION,
+        )
     console.print(f"[bold green]Technical report written:[/bold green] {path}")
 
 
@@ -344,15 +363,24 @@ def report_technical(register_path, target_name, auditor, version):
               help="Target application name. Falls back to AUDIT_TARGET_NAME env var.")
 @click.option("--version", default=None,
               help="Report version label. Falls back to AUDIT_REPORT_VERSION env var.")
-def report_executive(register_path, target_name, version):
+@_format_option
+def report_executive(register_path, target_name, version, output_format):
     """Generate a non-technical executive summary report."""
-    from src.reporting.report_generator import generate_executive_summary
     reg = register_path or _settings.DEFAULT_REGISTER_PATH
-    path = generate_executive_summary(
-        reg,
-        target_name=target_name or _settings.DEFAULT_TARGET_NAME,
-        version=version or _settings.DEFAULT_REPORT_VERSION,
-    )
+    if output_format == "html":
+        from src.reporting.html_report_generator import generate_executive_summary_html
+        path = generate_executive_summary_html(
+            reg,
+            target_name=target_name or _settings.DEFAULT_TARGET_NAME,
+            version=version or _settings.DEFAULT_REPORT_VERSION,
+        )
+    else:
+        from src.reporting.report_generator import generate_executive_summary
+        path = generate_executive_summary(
+            reg,
+            target_name=target_name or _settings.DEFAULT_TARGET_NAME,
+            version=version or _settings.DEFAULT_REPORT_VERSION,
+        )
     console.print(f"[bold green]Executive summary written:[/bold green] {path}")
 
 
@@ -361,11 +389,16 @@ def report_executive(register_path, target_name, version):
               help="Path to findings register. Falls back to AUDIT_REGISTER_PATH env var.")
 @click.option("--target", "target_name", default=None,
               help="Target application name. Falls back to AUDIT_TARGET_NAME env var.")
-def report_remediation(register_path, target_name):
+@_format_option
+def report_remediation(register_path, target_name, output_format):
     """Generate a prioritized remediation plan."""
-    from src.reporting.report_generator import generate_remediation_plan
     reg = register_path or _settings.DEFAULT_REGISTER_PATH
-    path = generate_remediation_plan(reg, target_name=target_name or _settings.DEFAULT_TARGET_NAME)
+    if output_format == "html":
+        from src.reporting.html_report_generator import generate_remediation_plan_html
+        path = generate_remediation_plan_html(reg, target_name=target_name or _settings.DEFAULT_TARGET_NAME)
+    else:
+        from src.reporting.report_generator import generate_remediation_plan
+        path = generate_remediation_plan(reg, target_name=target_name or _settings.DEFAULT_TARGET_NAME)
     console.print(f"[bold green]Remediation plan written:[/bold green] {path}")
 
 

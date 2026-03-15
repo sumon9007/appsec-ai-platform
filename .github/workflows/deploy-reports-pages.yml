@@ -35,6 +35,20 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate HTML reports
+        env:
+          AUDIT_TARGET_NAME: ${{ vars.AUDIT_TARGET_NAME || 'Security Assessment' }}
+          AUDIT_DEFAULT_AUDITOR: ${{ vars.AUDIT_DEFAULT_AUDITOR || 'Security Team' }}
+          AUDIT_REPORT_VERSION: ${{ vars.AUDIT_REPORT_VERSION || 'DRAFT v0.1' }}
+          AUDIT_REGISTER_PATH: ${{ vars.AUDIT_REGISTER_PATH || 'audit-runs/active/findings-register.md' }}
+        run: |
+          python3 scripts/run_audit.py report technical --format html || true
+          python3 scripts/run_audit.py report executive --format html || true
+          python3 scripts/run_audit.py report remediation --format html || true
+
       - name: Build reports site
         run: python3 scripts/build_reports_site.py
 

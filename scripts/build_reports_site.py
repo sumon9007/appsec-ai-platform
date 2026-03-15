@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Build a static GitHub Pages site for markdown reports.
+Build a static GitHub Pages site for markdown and HTML reports.
 
 Outputs:
 - index.html redirect at site root
-- /reports/ landing page
-- /reports/draft/*.html and /reports/final/*.html rendered from markdown
+- /reports/ landing page (lists both Markdown-rendered and native HTML reports)
+- /reports/draft/*.html and /reports/final/*.html
+  - Markdown reports: rendered and wrapped in the site shell
+  - HTML reports: copied directly (already self-contained with embedded CSS)
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Union
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +29,7 @@ OUTPUT_DIR = PROJECT_ROOT / "site"
 
 @dataclass
 class ReportPage:
+    """A Markdown-sourced report rendered into the site shell."""
     source_path: Path
     audience: str
     title: str
@@ -46,6 +49,28 @@ class ReportPage:
         return f"./{self.audience}/{self.slug}.html"
 
 
+@dataclass
+class HtmlReport:
+    """A self-contained HTML report copied directly into the site output."""
+    source_path: Path
+    audience: str
+    title: str
+    report_date: str
+    summary: str
+
+    @property
+    def output_path(self) -> Path:
+        return OUTPUT_DIR / "reports" / self.audience / self.source_path.name
+
+    @property
+    def href(self) -> str:
+        return f"./{self.audience}/{self.source_path.name}"
+
+    @property
+    def slug(self) -> str:
+        return self.source_path.stem
+
+
 def main() -> None:
     if OUTPUT_DIR.exists():
         shutil.rmtree(OUTPUT_DIR)
@@ -54,27 +79,36 @@ def main() -> None:
     (OUTPUT_DIR / "reports" / "final").mkdir(parents=True, exist_ok=True)
 
     _copy_assets()
-    reports = _load_reports()
+    md_reports = _load_md_reports()
+    html_reports = _load_html_reports()
+
     _write_root_redirect()
-    _write_reports_index(reports)
-    for report in reports:
+    _write_reports_index(md_reports, html_reports)
+
+    for report in md_reports:
         _write_report_page(report)
+    for report in html_reports:
+        _copy_html_report(report)
 
 
 def _copy_assets() -> None:
     shutil.copytree(ASSETS_DIR, OUTPUT_DIR / "assets")
 
 
-def _load_reports() -> List[ReportPage]:
+# ---------------------------------------------------------------------------
+# Markdown report loading
+# ---------------------------------------------------------------------------
+
+def _load_md_reports() -> List[ReportPage]:
     reports: List[ReportPage] = []
     for audience in ("draft", "final"):
         for path in sorted((REPORTS_DIR / audience).glob("*.md")):
             markdown = path.read_text(encoding="utf-8")
-            reports.append(_parse_report(path, audience, markdown))
+            reports.append(_parse_md_report(path, audience, markdown))
     return reports
 
 
-def _parse_report(path: Path, audience: str, markdown: str) -> ReportPage:
+def _parse_md_report(path: Path, audience: str, markdown: str) -> ReportPage:
     title = _first_heading(markdown) or path.stem.replace("-", " ").title()
     report_date = _extract_bold_field(markdown, "Report Date") or _infer_date_from_filename(path.name)
     version = _extract_bold_field(markdown, "Version") or "Unspecified"
@@ -95,6 +129,47 @@ def _parse_report(path: Path, audience: str, markdown: str) -> ReportPage:
     )
 
 
+# ---------------------------------------------------------------------------
+# HTML report loading
+# ---------------------------------------------------------------------------
+
+def _load_html_reports() -> List[HtmlReport]:
+    reports: List[HtmlReport] = []
+    for audience in ("draft", "final"):
+        for path in sorted((REPORTS_DIR / audience).glob("*.html")):
+            reports.append(_parse_html_report(path, audience))
+    return reports
+
+
+def _parse_html_report(path: Path, audience: str) -> HtmlReport:
+    content = path.read_text(encoding="utf-8")
+    title_match = re.search(r"<title>([^<]+)</title>", content, re.IGNORECASE)
+    title = title_match.group(1).strip() if title_match else path.stem.replace("-", " ").title()
+    report_date = _infer_date_from_filename(path.name)
+    # Extract posture statement or first meaningful paragraph from the HTML body
+    posture_match = re.search(r'class="posture[^"]*"[^>]*>([^<]{30,})<', content)
+    if posture_match:
+        summary = posture_match.group(1).strip()
+    else:
+        summary = "Security assessment report"
+    return HtmlReport(
+        source_path=path,
+        audience=audience,
+        title=title,
+        report_date=report_date,
+        summary=summary,
+    )
+
+
+def _copy_html_report(report: HtmlReport) -> None:
+    """Copy a self-contained HTML report directly to the site output directory."""
+    shutil.copy2(report.source_path, report.output_path)
+
+
+# ---------------------------------------------------------------------------
+# Site pages
+# ---------------------------------------------------------------------------
+
 def _write_root_redirect() -> None:
     content = """<!DOCTYPE html>
 <html lang="en">
@@ -114,27 +189,40 @@ def _write_root_redirect() -> None:
     (OUTPUT_DIR / ".nojekyll").write_text("", encoding="utf-8")
 
 
-def _write_reports_index(reports: Iterable[ReportPage]) -> None:
-    reports = list(reports)
-    draft_cards = "\n".join(_report_card(report) for report in reports if report.audience == "draft")
-    final_cards = "\n".join(_report_card(report) for report in reports if report.audience == "final")
-    if not draft_cards:
-        draft_cards = '<p class="empty-state">No draft reports published yet.</p>'
-    if not final_cards:
-        final_cards = '<p class="empty-state">No final reports published yet.</p>'
+def _write_reports_index(
+    md_reports: List[ReportPage],
+    html_reports: List[HtmlReport],
+) -> None:
+    all_reports: List[Union[ReportPage, HtmlReport]] = sorted(
+        list(md_reports) + list(html_reports),
+        key=lambda r: (r.report_date, r.title),
+        reverse=True,
+    )
+
+    def _cards(audience: str) -> str:
+        cards = [
+            _report_card(r) for r in all_reports if r.audience == audience
+        ]
+        return "\n".join(cards) if cards else f'<p class="empty-state">No {audience} reports published yet.</p>'
+
+    draft_cards = _cards("draft")
+    final_cards = _cards("final")
 
     payload = [
         {
-            "title": report.title,
-            "audience": report.audience,
-            "report_date": report.report_date,
-            "version": report.version,
-            "classification": report.classification,
-            "summary": report.summary,
-            "href": report.href,
+            "title": r.title,
+            "audience": r.audience,
+            "report_date": r.report_date,
+            "version": getattr(r, "version", "HTML"),
+            "classification": getattr(r, "classification", "—"),
+            "summary": r.summary,
+            "href": r.href,
         }
-        for report in reports
+        for r in all_reports
     ]
+
+    total_draft = sum(1 for r in all_reports if r.audience == "draft")
+    total_final = sum(1 for r in all_reports if r.audience == "final")
 
     content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -161,9 +249,9 @@ def _write_reports_index(reports: Iterable[ReportPage]) -> None:
         <div class="sidebar-panel">
           <p class="panel-label">Published Sets</p>
           <ul class="stat-list">
-            <li><span>Draft</span><strong>{sum(1 for report in reports if report.audience == "draft")}</strong></li>
-            <li><span>Final</span><strong>{sum(1 for report in reports if report.audience == "final")}</strong></li>
-            <li><span>Total</span><strong>{len(reports)}</strong></li>
+            <li><span>Draft</span><strong>{total_draft}</strong></li>
+            <li><span>Final</span><strong>{total_final}</strong></li>
+            <li><span>Total</span><strong>{len(all_reports)}</strong></li>
           </ul>
         </div>
       </aside>
@@ -217,27 +305,30 @@ def _write_reports_index(reports: Iterable[ReportPage]) -> None:
     (OUTPUT_DIR / "reports" / "index.html").write_text(content, encoding="utf-8")
 
 
-def _report_card(report: ReportPage) -> str:
-    search_text = " ".join(
-        [
-            report.title,
-            report.report_date,
-            report.version,
-            report.classification,
-            report.summary,
-        ]
-    ).lower()
+def _report_card(report: Union[ReportPage, HtmlReport]) -> str:
+    is_html = isinstance(report, HtmlReport)
+    version = getattr(report, "version", "HTML")
+    classification = getattr(report, "classification", "—")
+    format_badge = '<span class="badge badge-html">HTML</span>' if is_html else ""
+    search_text = " ".join([
+        report.title,
+        report.report_date,
+        version,
+        classification,
+        report.summary,
+    ]).lower()
     return f"""
       <article class="report-card" data-search="{html.escape(search_text)}">
         <div class="card-topline">
           <span class="badge badge-{report.audience}">{html.escape(report.audience.title())}</span>
+          {format_badge}
           <span class="meta">{html.escape(report.report_date)}</span>
         </div>
         <h4>{html.escape(report.title)}</h4>
-        <p class="summary">{html.escape(report.summary)}</p>
+        <p class="summary">{html.escape(report.summary[:160])}</p>
         <dl class="card-meta">
-          <div><dt>Version</dt><dd>{html.escape(report.version)}</dd></div>
-          <div><dt>Classification</dt><dd>{html.escape(report.classification)}</dd></div>
+          <div><dt>Version</dt><dd>{html.escape(version)}</dd></div>
+          <div><dt>Classification</dt><dd>{html.escape(classification)}</dd></div>
         </dl>
         <a class="card-link" href="{html.escape(report.href)}">Open report</a>
       </article>
@@ -285,6 +376,10 @@ def _write_report_page(report: ReportPage) -> None:
     report.output_path.write_text(content, encoding="utf-8")
 
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
 def _first_heading(markdown: str) -> str:
     for line in markdown.splitlines():
         if line.startswith("# "):
@@ -311,7 +406,7 @@ def _extract_summary(markdown: str) -> str:
 
 
 def _first_nonempty_paragraph(markdown: str) -> str:
-    paragraphs = []
+    paragraphs: List[str] = []
     current: List[str] = []
     for line in markdown.splitlines():
         stripped = line.strip()
