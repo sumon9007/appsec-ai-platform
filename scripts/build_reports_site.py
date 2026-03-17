@@ -24,6 +24,7 @@ from typing import Iterable, List, Union
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORTS_DIR = PROJECT_ROOT / "reports"
 ASSETS_DIR = PROJECT_ROOT / "site_assets"
+STATIC_DIR = PROJECT_ROOT / "static"
 OUTPUT_DIR = PROJECT_ROOT / "site"
 
 
@@ -79,6 +80,7 @@ def main() -> None:
     (OUTPUT_DIR / "reports" / "final").mkdir(parents=True, exist_ok=True)
 
     _copy_assets()
+    _copy_static_pages()
     md_reports = _load_md_reports()
     html_reports = _load_html_reports()
 
@@ -93,6 +95,14 @@ def main() -> None:
 
 def _copy_assets() -> None:
     shutil.copytree(ASSETS_DIR, OUTPUT_DIR / "assets")
+
+
+def _copy_static_pages() -> None:
+    """Copy static HTML pages from static/ to the site root."""
+    if not STATIC_DIR.exists():
+        return
+    for page in STATIC_DIR.glob("*.html"):
+        shutil.copy2(page, OUTPUT_DIR / page.name)
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +263,11 @@ def _write_reports_index(
             <li><span>Final</span><strong>{total_final}</strong></li>
             <li><span>Total</span><strong>{len(all_reports)}</strong></li>
           </ul>
+        </div>
+        <div class="sidebar-panel">
+          <p class="panel-label">Platform</p>
+          <a class="card-link" href="../solution-brief.html" style="font-size:0.9rem;">Solution Brief</a>
+          <p class="panel-note" style="margin-top:8px;">Management overview of platform capabilities, governance model, and delivery workflow.</p>
         </div>
       </aside>
       <main class="content">

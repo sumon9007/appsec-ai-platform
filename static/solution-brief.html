@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solution Brief — AppSec AI Platform</title>
+    <meta name="description" content="Management solution brief for the AppSec AI Platform — an authorized, evidence-based web application security audit platform." />
+    <link rel="stylesheet" href="./assets/reports.css" />
+    <style>
+      /* ── At-a-Glance ─────────────────────────────────────────── */
+      .at-a-glance {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        background: rgba(75, 139, 255, 0.14);
+        border: 1px solid rgba(75, 139, 255, 0.24);
+        border-radius: 18px;
+        overflow: hidden;
+        margin: 0.25rem 0 2.5rem;
+        gap: 1px;
+      }
+      .aag-item {
+        background: rgba(10, 16, 30, 0.92);
+        padding: 18px 20px;
+      }
+      .aag-value {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #4b8bff;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .aag-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+      }
+
+      /* ── Maturity pills ──────────────────────────────────────── */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        font-family: "IBM Plex Mono", monospace;
+        white-space: nowrap;
+      }
+      .pill-high   { background: rgba(34,197,94,0.14);   color: #86efac; border: 1px solid rgba(34,197,94,0.22); }
+      .pill-medium { background: rgba(251,191,36,0.14);  color: #fde68a; border: 1px solid rgba(251,191,36,0.22); }
+      .pill-low    { background: rgba(248,113,113,0.14); color: #fca5a5; border: 1px solid rgba(248,113,113,0.22); }
+      .pill-road   { background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.18); }
+
+      /* ── Domain feature cards ────────────────────────────────── */
+      .domain-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+        gap: 14px;
+        margin: 1rem 0 2rem;
+      }
+      .domain-card {
+        background: linear-gradient(160deg, rgba(17,24,39,0.92) 0%, rgba(0,0,0,0.72) 100%);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 18px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 180ms ease;
+      }
+      .domain-card::before {
+        content: "";
+        position: absolute;
+        top: -24px; right: -24px;
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(75,139,255,0.15), transparent 70%);
+        pointer-events: none;
+      }
+      .domain-card:hover { border-color: rgba(147,197,253,0.28); }
+      .dc-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .dc-title {
+        font-size: 0.94rem;
+        font-weight: 700;
+        color: #93c5fd;
+        margin: 0;
+      }
+      .domain-card ul { padding-left: 1rem; margin: 0 0 4px; }
+      .domain-card li { font-size: 0.85rem; color: var(--muted); line-height: 1.55; }
+      .domain-card li + li { margin-top: 3px; }
+
+      /* ── Workflow steps ───────────────────────────────────────── */
+      .workflow-steps {
+        list-style: none;
+        padding: 0; margin: 1rem 0 2rem;
+        display: grid; gap: 10px;
+      }
+      .workflow-step {
+        display: flex; gap: 16px; align-items: flex-start;
+        background: rgba(17,24,39,0.65);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        padding: 15px 18px;
+        transition: border-color 160ms ease;
+      }
+      .workflow-step:hover { border-color: rgba(75,139,255,0.22); }
+      .step-num {
+        flex-shrink: 0;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: rgba(75,139,255,0.18);
+        border: 1px solid rgba(75,139,255,0.38);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.84rem;
+        color: #93c5fd;
+        font-family: "IBM Plex Mono", monospace;
+        margin-top: 2px;
+      }
+      .step-body { flex: 1; }
+      .step-title { font-weight: 700; color: #fff; font-size: 0.94rem; margin: 0 0 3px; }
+      .step-desc  { color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin: 0; }
+      .step-tag {
+        display: inline-block; margin-top: 7px;
+        font-family: "IBM Plex Mono", monospace; font-size: 0.72rem;
+        color: rgba(147,197,253,0.65);
+        background: rgba(75,139,255,0.08);
+        border: 1px solid rgba(75,139,255,0.15);
+        border-radius: 6px; padding: 2px 8px;
+      }
+
+      /* ── Governance controls ─────────────────────────────────── */
+      .control-grid { display: grid; gap: 10px; margin: 1rem 0 2rem; }
+      .control-item {
+        display: flex; gap: 14px; align-items: flex-start;
+        padding: 14px 18px;
+        background: rgba(17,24,39,0.6);
+        border-left: 3px solid rgba(75,139,255,0.55);
+        border-radius: 0 12px 12px 0;
+      }
+      .ci-num {
+        flex-shrink: 0;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.78rem; font-weight: 700;
+        color: #4b8bff; margin-top: 2px; min-width: 24px;
+      }
+      .ci-body strong { display: block; color: #fff; font-size: 0.92rem; margin-bottom: 4px; }
+      .ci-body p { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+
+      /* ── Deliverable cards ───────────────────────────────────── */
+      .deliverable-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px; margin: 1rem 0 2rem;
+      }
+      .deliverable-card {
+        background: rgba(17,24,39,0.8);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px; padding: 18px;
+      }
+      .dv-eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+        color: #4b8bff; margin-bottom: 8px;
+      }
+      .dv-title    { font-weight: 700; font-size: 0.92rem; color: #fff; margin-bottom: 4px; }
+      .dv-audience { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+      .dv-formats  { display: flex; gap: 6px; flex-wrap: wrap; }
+      .fmt-tag {
+        font-family: "IBM Plex Mono", monospace; font-size: 0.67rem;
+        padding: 2px 8px; border-radius: 6px;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        color: var(--muted);
+      }
+
+      /* ── Architecture diagram ────────────────────────────────── */
+      .diagram-wrap {
+        background: rgba(0,0,0,0.35);
+        border: 1px solid rgba(75,139,255,0.16);
+        border-radius: 18px;
+        padding: 24px 16px;
+        margin: 1rem 0 2rem;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .diagram-wrap .mermaid { display: inline-block; min-width: min(560px, 100%); }
+
+      /* ── Takeaway cards ──────────────────────────────────────── */
+      .takeaway-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(218px, 1fr));
+        gap: 14px; margin: 1rem 0 1rem;
+      }
+      .takeaway-card {
+        background: linear-gradient(135deg, rgba(38,68,142,0.26), rgba(17,24,39,0.88));
+        border: 1px solid rgba(75,139,255,0.18);
+        border-radius: 16px; padding: 20px;
+      }
+      .tc-icon  { font-size: 1.35rem; margin-bottom: 10px; }
+      .tc-title { font-weight: 700; font-size: 0.92rem; color: #fff; margin-bottom: 7px; }
+      .tc-body  { font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin: 0; }
+
+      /* ── Infobox / callout ───────────────────────────────────── */
+      .infobox {
+        background: rgba(38,68,142,0.16);
+        border: 1px solid rgba(75,139,255,0.22);
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin: 1.5rem 0;
+      }
+      .infobox p { margin: 0; color: var(--muted); font-size: 0.89rem; line-height: 1.6; }
+      .infobox strong { color: #fff; }
+
+      /* ── Section divider ─────────────────────────────────────── */
+      .section-break {
+        border: 0;
+        border-top: 1px solid rgba(75,139,255,0.12);
+        margin: 2.5rem 0;
+      }
+
+      /* ── Page footer nav ─────────────────────────────────────── */
+      .page-nav {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.09);
+        margin-top: 2.5rem;
+      }
+      .nav-meta {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.74rem; color: var(--muted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="report-shell">
+
+      <!-- ═══════════════════════════════════════════════════════
+           PAGE HEADER / HERO
+      ═══════════════════════════════════════════════════════ -->
+      <header class="report-header">
+        <a class="back-link" href="./reports/">← Back to Reports Portal</a>
+        <div class="report-hero">
+          <div>
+            <p class="eyebrow">Management Brief</p>
+            <h1>AppSec AI Platform</h1>
+            <p class="page-copy">An authorized, evidence-based web application security audit platform. Structured assessment workflows. Multi-audience reporting. Governed by enforced safety and evidence quality rules.</p>
+          </div>
+          <dl class="hero-meta">
+            <div><dt>Document</dt><dd>Solution Brief</dd></div>
+            <div><dt>Version</dt><dd>v1.0</dd></div>
+            <div><dt>Audience</dt><dd>Management · Internal</dd></div>
+            <div><dt>Date</dt><dd>2026-03-17</dd></div>
+          </dl>
+        </div>
+      </header>
+
+      <!-- ═══════════════════════════════════════════════════════
+           MAIN CONTENT
+      ═══════════════════════════════════════════════════════ -->
+      <main class="markdown-frame">
+        <article class="markdown-body">
+
+          <!-- AT A GLANCE ──────────────────────────────────────── -->
+          <div class="at-a-glance">
+            <div class="aag-item">
+              <div class="aag-value">13</div>
+              <div class="aag-label">Audit Tools</div>
+            </div>
+            <div class="aag-item">
+              <div class="aag-value">3</div>
+              <div class="aag-label">Report Types</div>
+            </div>
+            <div class="aag-item">
+              <div class="aag-value">2</div>
+              <div class="aag-label">Output Formats</div>
+            </div>
+            <div class="aag-item">
+              <div class="aag-value">6</div>
+              <div class="aag-label">Governance Rules</div>
+            </div>
+            <div class="aag-item">
+              <div class="aag-value">5</div>
+              <div class="aag-label">Parsers</div>
+            </div>
+            <div class="aag-item">
+              <div class="aag-value">~8k</div>
+              <div class="aag-label">Lines of Python</div>
+            </div>
+          </div>
+
+          <!-- 01 · EXECUTIVE SUMMARY ───────────────────────────── -->
+          <p class="eyebrow">01 &mdash; Executive Summary</p>
+          <h2>What This Platform Does</h2>
+
+          <p>
+            <strong>AppSec AI Platform</strong> is an enterprise-grade web application security audit platform that combines a structured Python automation layer with a governed intelligence layer. It delivers consistent, evidence-based security assessments and produces professional audit reports tailored to three distinct audiences: security teams, leadership, and engineering.
+          </p>
+          <p>
+            The platform enforces written authorization before any audit activity begins, operates in passive review mode by default, and requires labeled evidence behind every finding before it enters the register. These are not documentation guidelines — they are code-level controls. The result is audit output that is defensible, consistent, and ready for compliance or management review.
+          </p>
+          <p>
+            Phase 1 is operational. Passive web application security assessment, evidence collection, findings normalization, and HTML report generation are fully implemented. Active testing capabilities are architecturally present but gated behind explicit authorization. Engineering AppSec extensions (SAST, IaC, cloud) are on the development roadmap.
+          </p>
+
+          <hr class="section-break" />
+
+          <!-- 02 · BUSINESS PROBLEM ────────────────────────────── -->
+          <p class="eyebrow">02 &mdash; Business Problem</p>
+          <h2>The Problem This Platform Solves</h2>
+
+          <p>Security reviews conducted without a structured platform produce inconsistent results, lack defensible evidence trails, and fail to communicate risk clearly to the right audiences.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Problem</th><th>Impact</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Ad hoc, inconsistent assessments</strong></td>
+                  <td>Audit quality varies by analyst; results cannot be meaningfully compared across time or teams</td>
+                </tr>
+                <tr>
+                  <td><strong>No systematic evidence collection</strong></td>
+                  <td>Findings are difficult to defend, challenge, or track across engagement cycles</td>
+                </tr>
+                <tr>
+                  <td><strong>No defined remediation timelines</strong></td>
+                  <td>Issues age without accountability; risk is not managed to closure</td>
+                </tr>
+                <tr>
+                  <td><strong>Single-audience reporting</strong></td>
+                  <td>Technical detail overwhelms leadership; non-technical summaries miss critical context for engineering</td>
+                </tr>
+                <tr>
+                  <td><strong>Authorization not enforced</strong></td>
+                  <td>Testing may proceed without written approval — a legal, compliance, and reputational risk</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 03 · SOLUTION OVERVIEW ───────────────────────────── -->
+          <p class="eyebrow">03 &mdash; Solution Overview</p>
+          <h2>How the Platform Is Structured</h2>
+
+          <p>The platform operates as two complementary layers that work together in every audit engagement.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Layer</th><th>Location</th><th>Responsibility</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Python Automation Layer</strong></td>
+                  <td><code>src/</code> · <code>scripts/</code></td>
+                  <td>CLI-driven execution, 13 audit tools, 5 parsers, evidence and findings writers, report generators</td>
+                </tr>
+                <tr>
+                  <td><strong>Governance and Intelligence Layer</strong></td>
+                  <td><code>.claude/</code></td>
+                  <td>Authorization rules, scope enforcement, evidence quality standards, severity criteria, remediation SLAs, domain-specific review skills and templates</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            Every audit engagement starts by reading context files that define the target, authorization status, scope boundaries, and assumptions. The authorization gate is verified at the code level before any tool executes. All findings are normalized to a consistent structure and accumulate in an append-only findings register that feeds all report generation.
+          </p>
+
+          <div class="infobox">
+            <p><strong>Design principle:</strong> The platform cannot produce a finding without a documented evidence basis, cannot begin audit activity without confirmed written authorization, and cannot test targets outside the defined scope. These constraints are enforced at runtime, not just documented in policy.</p>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 04 · KEY FUNCTIONS AND FEATURES ─────────────────── -->
+          <p class="eyebrow">04 &mdash; Key Functions and Features</p>
+          <h2>Capability Domains</h2>
+
+          <div class="domain-grid">
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Audit Orchestration</p>
+                <span class="pill pill-high">Implemented</span>
+              </div>
+              <ul>
+                <li>Full multi-tool audit workflow via a single CLI command</li>
+                <li>Domain-specific execution: headers, TLS, cookies, dependencies, secrets, crawl</li>
+                <li>Multi-target support, configurable via <code>.env</code></li>
+                <li>Run-state persistence for interrupted sessions</li>
+                <li>Cadence templates: weekly, monthly, quarterly, release gate, annual</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Scope and Authorization Control</p>
+                <span class="pill pill-high">Implemented</span>
+              </div>
+              <ul>
+                <li>Mandatory authorization gate — CONFIRMED status required before any execution</li>
+                <li>Scope file enforcement — out-of-scope targets blocked at the workflow level</li>
+                <li>Passive-by-default mode — active testing requires explicit written override</li>
+                <li>Mandatory stop conditions for unexpected sensitive data discovery</li>
+                <li>Six enforced governance rules covering safety, scope, evidence, and reporting</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Passive Web Security Analysis</p>
+                <span class="pill pill-high">Implemented</span>
+              </div>
+              <ul>
+                <li>HTTP security headers: HSTS, CSP, X-Frame-Options, CORS, Referrer-Policy, Permissions-Policy</li>
+                <li>TLS and certificate assessment: protocol version, cert validity, cipher signals</li>
+                <li>Cookie security: Secure, HttpOnly, SameSite, Path attributes</li>
+                <li>Breadth-first same-origin crawler and endpoint inventory</li>
+                <li>Dependency vulnerability check via OSV.dev API — 8 manifest formats</li>
+                <li>Secrets detection — 15+ regex patterns covering API keys, tokens, private keys</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Authentication and Session Review</p>
+                <span class="pill pill-medium">Partial</span>
+              </div>
+              <ul>
+                <li>Login page observation and MFA signal detection</li>
+                <li>Session token analysis — observation-focused</li>
+                <li>JWT token parsing — header and payload claim inspection</li>
+                <li>Authentication best-practice gap identification and documentation</li>
+                <li>Active test execution is scaffolded; requires authorization extension to activate</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">API, Dependency and Configuration Review</p>
+                <span class="pill pill-medium">Partial</span>
+              </div>
+              <ul>
+                <li>OpenAPI 3.0 and Postman collection parsing with auth signal detection</li>
+                <li>Known-path misconfiguration checks: admin panels, debug endpoints, config exposure</li>
+                <li>RBAC and access control — passive path probing; active IDOR tests scaffolded</li>
+                <li>Input validation — review-gap documentation; active injection tests not yet implemented</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Evidence and Findings Management</p>
+                <span class="pill pill-high">Implemented</span>
+              </div>
+              <ul>
+                <li>Automatic <code>EVID-YYYY-MM-DD-NNN</code> labeled evidence file creation per finding</li>
+                <li>Three-stage evidence pipeline: raw → reviewed → summarized</li>
+                <li>Append-only <code>FIND-NNN</code> findings register — single source of truth</li>
+                <li>Normalized finding structure: severity, confidence, domain, recommendation, evidence reference</li>
+                <li>CVSS-aligned severity model — Critical through Info with documented override rules</li>
+                <li>Remediation SLA enforcement: Critical 24 h, High 7 d, Medium 30 d, Low 90 d</li>
+              </ul>
+            </div>
+
+            <div class="domain-card">
+              <div class="dc-head">
+                <p class="dc-title">Report Generation and Publishing</p>
+                <span class="pill pill-high">Implemented</span>
+              </div>
+              <ul>
+                <li>Three report types: Technical Report, Executive Summary, Remediation Plan</li>
+                <li>Markdown and self-contained HTML output formats</li>
+                <li>HTML reports include SVG severity distribution charts and professional styling</li>
+                <li>GitHub Pages HTML portal builder for stakeholder distribution</li>
+                <li>Enforced naming convention and version labeling — Draft v0.x through Final v1.0</li>
+              </ul>
+            </div>
+
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 05 · END-TO-END WORKFLOW ─────────────────────────── -->
+          <p class="eyebrow">05 &mdash; End-to-End Workflow</p>
+          <h2>From Setup to Publication</h2>
+
+          <p>The platform follows a strict seven-stage engagement workflow. Authorization is verified before execution begins; evidence is captured automatically; reports are generated from the findings register at any point in the engagement.</p>
+
+          <ol class="workflow-steps">
+            <li class="workflow-step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <p class="step-title">Platform Setup</p>
+                <p class="step-desc">Install Python dependencies, configure <code>.env</code> with the target URL and auditor details, provision the virtual environment.</p>
+                <span class="step-tag">pip install -r requirements.txt</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <p class="step-title">Authorization and Context</p>
+                <p class="step-desc">Populate <code>.claude/context/audit-context.md</code> with CONFIRMED authorization status, the authorizing party, and a reference to the authorization document. Define in-scope and out-of-scope targets in <code>scope.md</code>.</p>
+                <span class="step-tag">Code-level enforcement — execution halts without CONFIRMED status</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <p class="step-title">Audit Execution</p>
+                <p class="step-desc">Run the CLI with the selected domain or full workflow. The authorization gate is checked first. Passive audit tools execute in sequence across all in-scope targets.</p>
+                <span class="step-tag">python scripts/run_audit.py audit full</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <p class="step-title">Evidence Capture</p>
+                <p class="step-desc">Each audit tool automatically writes <code>EVID-</code> labeled evidence files to <code>evidence/raw/</code>. The auditor reviews and promotes evidence through the three-stage pipeline before report inclusion.</p>
+                <span class="step-tag">evidence/raw/ &rarr; reviewed/ &rarr; summarized/</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">5</div>
+              <div class="step-body">
+                <p class="step-title">Findings Registration</p>
+                <p class="step-desc">Normalized <code>FIND-NNN</code> entries are appended to the findings register with severity, confidence, domain, recommendation, and evidence reference. The register is the single source of truth for the engagement.</p>
+                <span class="step-tag">audit-runs/active/findings-register.md</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">6</div>
+              <div class="step-body">
+                <p class="step-title">Report Generation</p>
+                <p class="step-desc">Three report types are generated from the findings register in both Markdown and self-contained HTML formats. HTML versions include severity distribution charts.</p>
+                <span class="step-tag">python scripts/run_audit.py report technical | executive | remediation</span>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <div class="step-num">7</div>
+              <div class="step-body">
+                <p class="step-title">Site Publication</p>
+                <p class="step-desc">The HTML site builder assembles all reports into a GitHub Pages portal for stakeholder distribution and management review.</p>
+                <span class="step-tag">python scripts/build_reports_site.py</span>
+              </div>
+            </li>
+          </ol>
+
+          <hr class="section-break" />
+
+          <!-- 06 · GOVERNANCE AND SAFETY ──────────────────────── -->
+          <p class="eyebrow">06 &mdash; Governance and Safety Controls</p>
+          <h2>How the Platform Stays Safe and Accountable</h2>
+
+          <p>Six rule sets govern every engagement. These are enforced at both the documentation and code levels — not aspirational policies.</p>
+
+          <div class="control-grid">
+            <div class="control-item">
+              <div class="ci-num">01</div>
+              <div class="ci-body">
+                <strong>Authorization Enforcement</strong>
+                <p>All audit workflows verify <code>.claude/context/audit-context.md</code> for a CONFIRMED authorization status at runtime. No testing activity of any kind begins without written authorization from the named authorizing party.</p>
+              </div>
+            </div>
+            <div class="control-item">
+              <div class="ci-num">02</div>
+              <div class="ci-body">
+                <strong>Passive-by-Default Mode</strong>
+                <p>The default operating mode is passive review — reading and analyzing observable security properties without submitting test payloads. Active testing requires explicit written authorization and is architecturally gated behind an authorization override. Production environments are protected by this default.</p>
+              </div>
+            </div>
+            <div class="control-item">
+              <div class="ci-num">03</div>
+              <div class="ci-body">
+                <strong>Scope Enforcement</strong>
+                <p>Out-of-scope targets defined in <code>scope.md</code> are blocked at the workflow level. Out-of-scope conditions observed passively are labeled <code>[OUT OF SCOPE — NOT TESTED]</code> and documented without further investigation. Scope expansion requires written authorization and a logged change entry.</p>
+              </div>
+            </div>
+            <div class="control-item">
+              <div class="ci-num">04</div>
+              <div class="ci-body">
+                <strong>Mandatory Stop Conditions</strong>
+                <p>The platform must halt all audit activity immediately if unexpected PII, payment card data, plaintext credentials, private encryption keys, or indicators of active compromise are discovered. The auditor is alerted and must seek explicit guidance before continuing.</p>
+              </div>
+            </div>
+            <div class="control-item">
+              <div class="ci-num">05</div>
+              <div class="ci-body">
+                <strong>Evidence Quality Rules</strong>
+                <p>Every finding must reference at least one <code>EVID-</code> labeled piece of evidence before entering the findings register. Speculative findings are prohibited in formal reports. Evidence without a date and attribution may not support a finding. Sensitive data discovered in evidence must be redacted before report inclusion.</p>
+              </div>
+            </div>
+            <div class="control-item">
+              <div class="ci-num">06</div>
+              <div class="ci-body">
+                <strong>Severity and Remediation Standards</strong>
+                <p>Five severity levels — Critical, High, Medium, Low, Info — are aligned to CVSS v3 guidance. Severity overrides require documented justification. Remediation SLAs are defined and tracked: Critical 24 hours, High 7 days, Medium 30 days, Low 90 days. Risk acceptance requires management sign-off and an expiry date of no more than six months.</p>
+              </div>
+            </div>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 07 · OUTPUTS AND DELIVERABLES ───────────────────── -->
+          <p class="eyebrow">07 &mdash; Outputs and Deliverables</p>
+          <h2>What Every Engagement Produces</h2>
+
+          <p>All formal reports are generated from a single findings register, ensuring consistency across all audience-facing outputs.</p>
+
+          <div class="deliverable-grid">
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Report</p>
+              <p class="dv-title">Technical Report</p>
+              <p class="dv-audience">Security team</p>
+              <p class="dv-audience">Detailed findings with evidence references, CVSS-aligned severity, technical recommendations, and acceptance criteria mapping.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">.md</span>
+                <span class="fmt-tag">.html</span>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Report</p>
+              <p class="dv-title">Executive Summary</p>
+              <p class="dv-audience">Leadership / Management</p>
+              <p class="dv-audience">Non-technical posture overview, key finding headlines, recommended priorities, and overall risk trend. No raw HTTP data or CVE identifiers.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">.md</span>
+                <span class="fmt-tag">.html</span>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Report</p>
+              <p class="dv-title">Remediation Plan</p>
+              <p class="dv-audience">Engineering / Development</p>
+              <p class="dv-audience">Prioritized action list by severity with specific, actionable recommendations and SLA-based timelines. Separates immediate, short-term, and strategic fixes.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">.md</span>
+                <span class="fmt-tag">.html</span>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Working Document</p>
+              <p class="dv-title">Findings Register</p>
+              <p class="dv-audience">Auditor</p>
+              <p class="dv-audience">Append-only <code>FIND-NNN</code> register. Single source of truth for all findings across the engagement lifecycle — from confirmed through to closed or risk accepted.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">.md</span>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Audit Record</p>
+              <p class="dv-title">Evidence Archive</p>
+              <p class="dv-audience">Auditor / Compliance</p>
+              <p class="dv-audience"><code>EVID-</code> labeled evidence files processed through raw, reviewed, and summarized stages. Retains chain of custody for compliance and legal contexts.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">evidence/</span>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <p class="dv-eyebrow">Publication</p>
+              <p class="dv-title">HTML Report Portal</p>
+              <p class="dv-audience">All stakeholders</p>
+              <p class="dv-audience">Self-contained GitHub Pages portal with severity charts, searchable report cards, and a clean distribution interface for draft and final reports.</p>
+              <div class="dv-formats">
+                <span class="fmt-tag">GitHub Pages</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 08 · MATURITY SNAPSHOT ───────────────────────────── -->
+          <p class="eyebrow">08 &mdash; Current State</p>
+          <h2>Maturity Snapshot</h2>
+
+          <p>
+            The platform is at <strong>Phase 1 completion</strong>. Passive assessment and reporting are fully operational and production-ready. Active testing and engineering AppSec extensions are Phase 2 roadmap items.
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Domain</th><th>Status</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>HTTP Security Headers</td><td><span class="pill pill-high">Implemented</span></td><td>HSTS, CSP, X-Frame-Options, CORS, Referrer-Policy, Permissions-Policy</td></tr>
+                <tr><td>TLS / Certificate Assessment</td><td><span class="pill pill-high">Implemented</span></td><td>Protocol version, certificate validity, cipher signals</td></tr>
+                <tr><td>Cookie Security</td><td><span class="pill pill-high">Implemented</span></td><td>Secure, HttpOnly, SameSite, Path attribute checks</td></tr>
+                <tr><td>Dependency Vulnerability Check</td><td><span class="pill pill-high">Implemented</span></td><td>OSV.dev API integration — 8 manifest format types</td></tr>
+                <tr><td>Secrets Detection</td><td><span class="pill pill-high">Implemented</span></td><td>15+ regex patterns: API keys, tokens, private keys</td></tr>
+                <tr><td>Crawling and Endpoint Inventory</td><td><span class="pill pill-high">Implemented</span></td><td>Breadth-first, same-origin, configurable scope</td></tr>
+                <tr><td>Evidence and Findings Management</td><td><span class="pill pill-high">Implemented</span></td><td>EVID/FIND labeling, three-stage pipeline, normalized register</td></tr>
+                <tr><td>Report Generation and Publishing</td><td><span class="pill pill-high">Implemented</span></td><td>Markdown + HTML, three report types, GitHub Pages portal</td></tr>
+                <tr><td>Session and JWT Analysis</td><td><span class="pill pill-medium">Partial</span></td><td>Observation-focused; deep cryptographic validation not yet active</td></tr>
+                <tr><td>Authentication Assessment</td><td><span class="pill pill-medium">Partial</span></td><td>Review-gap identification; active testing scaffolded</td></tr>
+                <tr><td>RBAC and IDOR Review</td><td><span class="pill pill-medium">Partial</span></td><td>Passive path probing; active IDOR tests require authorization extension</td></tr>
+                <tr><td>API Security Assessment</td><td><span class="pill pill-medium">Partial</span></td><td>OpenAPI/Postman spec-based; active probing limited</td></tr>
+                <tr><td>Misconfiguration Detection</td><td><span class="pill pill-medium">Partial</span></td><td>Known-path checks and passive observation</td></tr>
+                <tr><td>Input Validation Review</td><td><span class="pill pill-low">Scaffolded</span></td><td>Review-gap documentation only; active injection testing not yet implemented</td></tr>
+                <tr><td>SAST / Code Analysis</td><td><span class="pill pill-road">Roadmap</span></td><td>Not in current scope</td></tr>
+                <tr><td>IaC and Container Security</td><td><span class="pill pill-road">Roadmap</span></td><td>Not in current scope</td></tr>
+                <tr><td>Cloud Provider Audit Modules</td><td><span class="pill pill-road">Roadmap</span></td><td>Not in current scope</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 09 · ARCHITECTURE DIAGRAM ───────────────────────── -->
+          <p class="eyebrow">09 &mdash; Architecture</p>
+          <h2>Execution Flow Diagram</h2>
+
+          <p>
+            The diagram shows the full execution path from operator input through to GitHub Pages publication. The authorization gate is the critical control point — no audit tool executes without passing through it.
+          </p>
+
+          <div class="diagram-wrap">
+            <pre class="mermaid">
+flowchart TD
+    OP(["Operator / Auditor"])
+    CTX["Context Setup\naudit-context.md · scope.md · .env"]
+
+    AUTH{{"Authorization\nGate"}}
+
+    HALT(["Halted\nAuth Required"])
+
+    CLI["CLI Runner\nrun_audit.py audit full"]
+
+    WF["Workflow Orchestrator\nsrc/workflows/full_audit.py"]
+
+    subgraph TOOLS ["Passive Audit Tools"]
+        T1["Headers\n& TLS"]
+        T2["Cookies\n& Session"]
+        T3["Dependencies\n& Secrets"]
+        T4["Crawl &\nEndpoints"]
+        T5["Auth, Config\n& API"]
+    end
+
+    EV[("Evidence Archive\nEVID-YYYY-MM-DD-NNN")]
+
+    FR[("Findings Register\nFIND-NNN")]
+
+    subgraph REPORTS ["Report Generation"]
+        R1["Technical\nReport"]
+        R2["Executive\nSummary"]
+        R3["Remediation\nPlan"]
+    end
+
+    PUB["HTML Site Builder\nbuild_reports_site.py"]
+
+    GH(["GitHub Pages\nPublication"])
+
+    OP --> CTX
+    CTX --> AUTH
+    AUTH -->|"CONFIRMED"| CLI
+    AUTH -->|"Not Confirmed"| HALT
+    CLI --> WF
+    WF --> TOOLS
+    T1 & T2 & T3 & T4 & T5 --> EV
+    T1 & T2 & T3 & T4 & T5 --> FR
+    EV --> FR
+    FR --> REPORTS
+    R1 & R2 & R3 --> PUB
+    PUB --> GH
+            </pre>
+          </div>
+
+          <hr class="section-break" />
+
+          <!-- 10 · MANAGEMENT TAKEAWAYS ────────────────────────── -->
+          <p class="eyebrow">10 &mdash; Summary</p>
+          <h2>Management Takeaways</h2>
+
+          <p>Key points for leadership and internal stakeholders evaluating this platform.</p>
+
+          <div class="takeaway-grid">
+            <div class="takeaway-card">
+              <div class="tc-icon">&#128274;</div>
+              <p class="tc-title">Authorized and Auditable by Design</p>
+              <p class="tc-body">Every audit run is gated behind confirmed written authorization. Every finding references labeled evidence. The platform cannot produce unsupported findings or proceed without explicit approval.</p>
+            </div>
+            <div class="takeaway-card">
+              <div class="tc-icon">&#128257;</div>
+              <p class="tc-title">Consistent and Repeatable</p>
+              <p class="tc-body">Standardized tooling and governance rules eliminate analyst-to-analyst variability. The same checks run the same way on every engagement, enabling meaningful comparison across time.</p>
+            </div>
+            <div class="takeaway-card">
+              <div class="tc-icon">&#128202;</div>
+              <p class="tc-title">Multi-Audience Reporting</p>
+              <p class="tc-body">One findings register produces three distinct reports: a technical deep-dive for the security team, a plain-language executive summary for leadership, and a prioritized remediation plan for engineering.</p>
+            </div>
+            <div class="takeaway-card">
+              <div class="tc-icon">&#128737;</div>
+              <p class="tc-title">Safe by Default</p>
+              <p class="tc-body">Passive review is the default mode. The platform will not perform active security testing unless explicitly authorized in writing. Production environments are protected by this architectural default.</p>
+            </div>
+            <div class="takeaway-card">
+              <div class="tc-icon">&#9201;</div>
+              <p class="tc-title">SLA-Driven Remediation</p>
+              <p class="tc-body">Every finding carries a specific, actionable recommendation and a defined resolution timeline. Critical issues require a response within 24 hours. Risk acceptance requires management sign-off and a fixed expiry.</p>
+            </div>
+            <div class="takeaway-card">
+              <div class="tc-icon">&#128640;</div>
+              <p class="tc-title">Phase 1 Operational</p>
+              <p class="tc-body">Passive web security assessment and professional reporting are fully implemented and production-ready. Active testing and engineering AppSec extensions (SAST, IaC, cloud) are the Phase 2 roadmap.</p>
+            </div>
+          </div>
+
+          <!-- PAGE NAV ──────────────────────────────────────────── -->
+          <div class="page-nav">
+            <a class="card-link" href="./reports/">Reports Portal</a>
+            <span class="nav-meta">AppSec AI Platform &middot; Solution Brief v1.0 &middot; 2026-03-17</span>
+            <a class="card-link" href="./reports/draft/2026-03-13-passive-executive-report.html">View Sample Report</a>
+          </div>
+
+        </article>
+      </main>
+    </div>
+
+    <!-- Mermaid JS — loaded from CDN, no build step required -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: true },
+        themeVariables: {
+          darkMode: true,
+          background: '#0a101e',
+          primaryColor: '#1e3a5f',
+          primaryTextColor: '#f1f5f9',
+          primaryBorderColor: '#4b8bff',
+          lineColor: '#4b8bff',
+          secondaryColor: '#1f2937',
+          tertiaryColor: '#0d1b2e',
+          edgeLabelBackground: '#1a2540',
+          clusterBkg: '#0d1b2e',
+          clusterBorder: '#2d4a7a',
+          titleColor: '#93c5fd',
+          fontFamily: '"Manrope", "Segoe UI", sans-serif'
+        }
+      });
+    </script>
+  </body>
+</html>

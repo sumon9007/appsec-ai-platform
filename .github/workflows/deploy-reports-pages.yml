@@ -7,6 +7,7 @@ on:
     paths:
       - "reports/**"
       - "site_assets/**"
+      - "static/**"
       - "scripts/build_reports_site.py"
       - ".github/workflows/deploy-reports-pages.yml"
   workflow_dispatch:
