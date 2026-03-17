@@ -186,11 +186,28 @@
         border: 1px solid rgba(75,139,255,0.16);
         border-radius: 18px;
         padding: 24px 16px;
-        margin: 1rem 0 2rem;
+        margin: 1rem 0 0;
         overflow-x: auto;
         text-align: center;
       }
       .diagram-wrap .mermaid { display: inline-block; min-width: min(560px, 100%); }
+
+      /* ── Diagram label and caption ───────────────────────────── */
+      .diagram-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #4b8bff;
+        margin: 1.75rem 0 8px;
+      }
+      .diagram-caption {
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--muted);
+        font-style: italic;
+        margin: 10px 0 2rem;
+      }
 
       /* ── Takeaway cards ──────────────────────────────────────── */
       .takeaway-grid {
@@ -723,62 +740,81 @@
 
           <!-- 09 · ARCHITECTURE DIAGRAM ───────────────────────── -->
           <p class="eyebrow">09 &mdash; Architecture</p>
-          <h2>Execution Flow Diagram</h2>
+          <h2>Platform Architecture and Execution Flow</h2>
 
           <p>
-            The diagram shows the full execution path from operator input through to GitHub Pages publication. The authorization gate is the critical control point — no audit tool executes without passing through it.
+            Two views of how the platform operates. The workflow strip shows the seven engagement stages at a management level. The architecture diagram shows the full technical execution path, including the authorization gate that must be passed before any audit activity begins.
           </p>
 
+          <!-- Diagram A: Management workflow strip -->
+          <p class="diagram-label">Management Workflow &mdash; Seven Engagement Stages</p>
           <div class="diagram-wrap">
             <pre class="mermaid">
+%%{init: {"theme": "dark", "flowchart": {"curve": "linear", "useMaxWidth": true}, "themeVariables": {"primaryColor": "#1e3a5f", "primaryTextColor": "#f1f5f9", "primaryBorderColor": "#4b8bff", "lineColor": "#4b8bff", "edgeLabelBackground": "#1a2540", "fontFamily": "Manrope, Segoe UI, sans-serif"}}}%%
+flowchart LR
+    classDef stage fill:#1e3a5f,stroke:#4b8bff,color:#f1f5f9,font-weight:bold
+    P["1 · Plan"]:::stage
+    A["2 · Authorize"]:::stage
+    E["3 · Execute"]:::stage
+    C["4 · Capture\nEvidence"]:::stage
+    F["5 · Generate\nFindings"]:::stage
+    R["6 · Produce\nReports"]:::stage
+    G["7 · Publish\nBriefing"]:::stage
+    P --> A --> E --> C --> F --> R --> G
+            </pre>
+          </div>
+          <p class="diagram-caption">End-to-end engagement lifecycle. Each stage has defined inputs, outputs, and platform tooling. Authorization must be confirmed before stage 3 can begin.</p>
+
+          <!-- Diagram B: Technical architecture -->
+          <p class="diagram-label">Technical Architecture &mdash; Full Execution Path</p>
+          <div class="diagram-wrap">
+            <pre class="mermaid">
+%%{init: {"theme": "dark", "flowchart": {"curve": "basis", "useMaxWidth": true}, "themeVariables": {"primaryColor": "#1e3a5f", "primaryTextColor": "#f1f5f9", "primaryBorderColor": "#4b8bff", "lineColor": "#4b8bff", "secondaryColor": "#1f2937", "tertiaryColor": "#0d1b2e", "edgeLabelBackground": "#1a2540", "clusterBkg": "#0d1b2e", "clusterBorder": "#2d4a7a", "titleColor": "#93c5fd", "fontFamily": "Manrope, Segoe UI, sans-serif"}}}%%
 flowchart TD
     OP(["Operator / Auditor"])
-    CTX["Context Setup\naudit-context.md · scope.md · .env"]
-
-    AUTH{{"Authorization\nGate"}}
-
-    HALT(["Halted\nAuth Required"])
-
-    CLI["CLI Runner\nrun_audit.py audit full"]
-
+    CTX["Context Files\naudit-context.md · scope.md · .env"]
+    POL["Policy Layer\nAuthorization · Scope · Stop Conditions"]
+    AUTH{"Authorization\nGate"}
+    HALT(["Halted — auth required"])
+    CLI["CLI Entry Point\nscripts/run_audit.py"]
     WF["Workflow Orchestrator\nsrc/workflows/full_audit.py"]
 
-    subgraph TOOLS ["Passive Audit Tools"]
-        T1["Headers\n& TLS"]
-        T2["Cookies\n& Session"]
-        T3["Dependencies\n& Secrets"]
-        T4["Crawl &\nEndpoints"]
-        T5["Auth, Config\n& API"]
+    subgraph AUDIT ["Audit Modules  ·  src/tools/"]
+        T1["Headers & TLS"]
+        T2["Cookies & Session"]
+        T3["Dependencies & Secrets"]
+        T4["Crawl & Endpoints"]
+        T5["Auth, Config & API"]
     end
 
-    EV[("Evidence Archive\nEVID-YYYY-MM-DD-NNN")]
+    EV[("Evidence Archive\nevidence/")]
+    FR[("Findings Register\naudit-runs/")]
 
-    FR[("Findings Register\nFIND-NNN")]
-
-    subgraph REPORTS ["Report Generation"]
-        R1["Technical\nReport"]
-        R2["Executive\nSummary"]
-        R3["Remediation\nPlan"]
+    subgraph RGEN ["Report Generation  ·  src/reporting/"]
+        TR["Technical\nReport"]
+        ES["Executive\nSummary"]
+        RM["Remediation\nPlan"]
     end
 
-    PUB["HTML Site Builder\nbuild_reports_site.py"]
-
-    GH(["GitHub Pages\nPublication"])
+    PUB["Static Site Builder\nscripts/build_reports_site.py"]
+    GH(["GitHub Pages"])
 
     OP --> CTX
-    CTX --> AUTH
+    CTX --> POL
+    POL --> AUTH
     AUTH -->|"CONFIRMED"| CLI
-    AUTH -->|"Not Confirmed"| HALT
+    AUTH -->|"not confirmed"| HALT
     CLI --> WF
-    WF --> TOOLS
+    WF --> T1 & T2 & T3 & T4 & T5
     T1 & T2 & T3 & T4 & T5 --> EV
     T1 & T2 & T3 & T4 & T5 --> FR
     EV --> FR
-    FR --> REPORTS
-    R1 & R2 & R3 --> PUB
+    FR --> TR & ES & RM
+    TR & ES & RM --> PUB
     PUB --> GH
             </pre>
           </div>
+          <p class="diagram-caption">Operator input flows through the policy and authorization gate before reaching the CLI. Each audit module writes evidence and findings independently. The findings register feeds all three report types, which are assembled into the published GitHub Pages site.</p>
 
           <hr class="section-break" />
 
@@ -832,29 +868,12 @@ flowchart TD
       </main>
     </div>
 
-    <!-- Mermaid JS — loaded from CDN, no build step required -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Mermaid JS — CDN, consistent with Google Fonts already loaded via reports.css.
+         Per-diagram theme is set via %%{init:}%% front-matter in each <pre class="mermaid">.
+         startOnLoad:true processes all .mermaid elements after DOMContentLoaded. -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
     <script>
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'dark',
-        flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: true },
-        themeVariables: {
-          darkMode: true,
-          background: '#0a101e',
-          primaryColor: '#1e3a5f',
-          primaryTextColor: '#f1f5f9',
-          primaryBorderColor: '#4b8bff',
-          lineColor: '#4b8bff',
-          secondaryColor: '#1f2937',
-          tertiaryColor: '#0d1b2e',
-          edgeLabelBackground: '#1a2540',
-          clusterBkg: '#0d1b2e',
-          clusterBorder: '#2d4a7a',
-          titleColor: '#93c5fd',
-          fontFamily: '"Manrope", "Segoe UI", sans-serif'
-        }
-      });
+      mermaid.initialize({ startOnLoad: true, theme: 'dark' });
     </script>
   </body>
 </html>
