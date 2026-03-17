@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import shutil
 from dataclasses import dataclass
@@ -203,17 +204,30 @@ def _write_reports_index(
     md_reports: List[ReportPage],
     html_reports: List[HtmlReport],
 ) -> None:
+    audit_target = os.getenv("AUDIT_TARGET_NAME", "—")
+    audit_cycle = os.getenv("AUDIT_CYCLE", "—")
+    audit_mode = os.getenv("AUDIT_MODE", "Passive Review")
+
     all_reports: List[Union[ReportPage, HtmlReport]] = sorted(
         list(md_reports) + list(html_reports),
         key=lambda r: (r.report_date, r.title),
         reverse=True,
     )
 
+    total_draft = sum(1 for r in all_reports if r.audience == "draft")
+    total_final = sum(1 for r in all_reports if r.audience == "final")
+    engagement_status = "active" if total_draft > 0 else "idle"
+    status_label = "Active Engagement" if total_draft > 0 else "No Active Drafts"
+
     def _cards(audience: str) -> str:
-        cards = [
-            _report_card(r) for r in all_reports if r.audience == audience
-        ]
-        return "\n".join(cards) if cards else f'<p class="empty-state">No {audience} reports published yet.</p>'
+        cards = [_report_card(r) for r in all_reports if r.audience == audience]
+        if cards:
+            return "\n".join(cards)
+        if audience == "draft":
+            msg = "No active drafts. Run an audit cycle to generate reports."
+        else:
+            msg = "No final reports have been released for this engagement."
+        return f'<div class="empty-portal"><p class="empty-portal-label">{msg}</p></div>'
 
     draft_cards = _cards("draft")
     final_cards = _cards("final")
@@ -231,16 +245,13 @@ def _write_reports_index(
         for r in all_reports
     ]
 
-    total_draft = sum(1 for r in all_reports if r.audience == "draft")
-    total_final = sum(1 for r in all_reports if r.audience == "final")
-
     content = f"""<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reports Portal</title>
-    <meta name="description" content="Security audit report portal for published workspace reports." />
+    <title>Audit Portal — AppSec AI Platform</title>
+    <meta name="description" content="Security audit reports and findings delivery portal." />
     <link rel="stylesheet" href="../assets/reports.css" />
   </head>
   <body>
@@ -248,16 +259,19 @@ def _write_reports_index(
       <aside class="sidebar">
         <div>
           <p class="eyebrow">AppSec AI Platform</p>
-          <h1>Reports Portal</h1>
-          <p class="lede">A polished GitHub Pages view for audit drafts, final reports, and supporting delivery artifacts, restyled to align with the Diversified Robotic visual language.</p>
+          <h1>Audit Portal</h1>
+          <p class="lede">Structured security audit reports, findings, and delivery artifacts for authorized engagements.</p>
         </div>
         <div class="sidebar-panel">
-          <p class="panel-label">Theme</p>
-          <p class="panel-value">Diversified Night</p>
-          <p class="panel-note">Dark gradient surfaces, electric blue accents, and glass-like panels adapted from the public site styling.</p>
+          <p class="panel-label">Engagement</p>
+          <dl class="engagement-kv">
+            <div><dt>Target</dt><dd>{html.escape(audit_target)}</dd></div>
+            <div><dt>Cycle</dt><dd>{html.escape(audit_cycle)}</dd></div>
+            <div><dt>Mode</dt><dd>{html.escape(audit_mode)}</dd></div>
+          </dl>
         </div>
         <div class="sidebar-panel">
-          <p class="panel-label">Published Sets</p>
+          <p class="panel-label">Report Status</p>
           <ul class="stat-list">
             <li><span>Draft</span><strong>{total_draft}</strong></li>
             <li><span>Final</span><strong>{total_final}</strong></li>
@@ -273,18 +287,28 @@ def _write_reports_index(
       <main class="content">
         <header class="page-header">
           <div>
-            <p class="eyebrow">GitHub Pages</p>
-            <h2>Published Security Reports</h2>
-            <p class="page-copy">Use this portal to review current report drafts, share final write-ups, and keep client delivery material cleanly accessible under <code>/reports/</code>.</p>
+            <p class="eyebrow">Security Delivery Hub</p>
+            <h2>Published Reports</h2>
+            <p class="page-copy">Review current audit drafts, access approved final reports, and track remediation artifacts across active engagements.</p>
           </div>
           <label class="search-box">
             <span>Search</span>
             <input id="report-search" type="search" placeholder="Find a report by title or date" />
           </label>
         </header>
+        <div class="portal-status">
+          <span class="portal-status-item">
+            <span class="status-dot status-dot-{engagement_status}"></span>
+            {html.escape(status_label)}
+          </span>
+          <span class="portal-status-sep">|</span>
+          <span class="portal-status-item">{html.escape(audit_target)}</span>
+          <span class="portal-status-sep">|</span>
+          <span class="portal-status-item">{total_draft} draft &middot; {total_final} final</span>
+        </div>
         <section class="report-section">
           <div class="section-heading">
-            <p class="eyebrow">Working Material</p>
+            <p class="eyebrow">Active Engagement</p>
             <h3>Draft Reports</h3>
           </div>
           <div class="card-grid" data-group="draft">
@@ -293,7 +317,7 @@ def _write_reports_index(
         </section>
         <section class="report-section">
           <div class="section-heading">
-            <p class="eyebrow">Delivery Material</p>
+            <p class="eyebrow">Released Deliverables</p>
             <h3>Final Reports</h3>
           </div>
           <div class="card-grid" data-group="final">

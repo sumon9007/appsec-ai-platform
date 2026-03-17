@@ -553,3 +553,105 @@ h4 {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Enterprise portal additions --- */
+
+.portal-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 16px;
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 28px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.04em;
+}
+
+.portal-status-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.portal-status-sep {
+  opacity: 0.22;
+  font-size: 0.9rem;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.status-dot-active {
+  background: #34d399;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.22);
+}
+
+.status-dot-idle {
+  background: #475569;
+}
+
+.engagement-kv {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+}
+
+.engagement-kv > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.87rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-bottom: 9px;
+}
+
+.engagement-kv > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.engagement-kv dt {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  flex-shrink: 0;
+}
+
+.engagement-kv dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 500;
+  text-align: right;
+}
+
+.empty-portal {
+  padding: 44px 20px;
+  text-align: center;
+  border: 1px dashed rgba(147, 197, 253, 0.1);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.empty-portal-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  opacity: 0.6;
+  margin: 0;
+}

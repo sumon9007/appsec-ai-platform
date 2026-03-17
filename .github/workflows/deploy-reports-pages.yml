@@ -51,6 +51,10 @@ jobs:
           python3 scripts/run_audit.py report remediation --format html || true
 
       - name: Build reports site
+        env:
+          AUDIT_TARGET_NAME: ${{ vars.AUDIT_TARGET_NAME || 'Security Assessment' }}
+          AUDIT_CYCLE: ${{ vars.AUDIT_CYCLE || '—' }}
+          AUDIT_MODE: ${{ vars.AUDIT_MODE || 'Passive Review' }}
         run: python3 scripts/build_reports_site.py
 
       - name: Upload Pages artifact
