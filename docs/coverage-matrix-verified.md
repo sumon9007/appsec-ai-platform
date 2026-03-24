@@ -1,84 +1,131 @@
-# Coverage Matrix Verified
+# Coverage Matrix — Verified
 
-> **Snapshot notice:** Last verified March 2026 against the Python automation layer (`src/`). Active testing capabilities remain limited — most domains are passive-only unless explicitly authorized. Engineering AppSec domains (SAST, IaC, cloud) remain missing.
+> **Last verified:** March 2026 against `src/`. Active testing is limited — most domains are passive-only unless explicitly authorized. Engineering AppSec domains (SAST, IaC, cloud) are not implemented.
 
-This document validates the platform’s claimed coverage against the current codebase.
+This document is the authoritative coverage reference. It uses code-verified status labels only.
 
-## Verification Categories
+---
 
-- `Implemented in code`
-- `Partial`
-- `Documented but unverified`
-- `Missing`
+## Status Labels
 
-## Verified WSTG Mapping
+| Label | Meaning |
+|-------|---------|
+| `Implemented` | Runnable in code today — produces findings or evidence |
+| `Partial` | Code exists but coverage is limited, passive-only, or produces review gaps |
+| `Skill-guided only` | Methodology defined in `.claude/skills/`; no automated execution |
+| `Missing` | Not materially present — no code, no skill |
+
+---
+
+## OWASP WSTG Mapping
 
 | WSTG Domain | Status | Notes |
-|------------|--------|------|
-| Information Gathering | Implemented in code | Passive crawler and HTML inventory exist |
-| Configuration and Deployment Management | Implemented in code | Headers, TLS, misconfig, dependency review, secrets scan |
-| Identity Management | Missing | No dedicated identity lifecycle or enumeration module |
-| Authentication Testing | Partial | Passive auth review exists; fully authenticated validation is not end-to-end |
-| Authorization Testing | Partial | RBAC tool exists, but full multi-role active validation is limited |
-| Session Management | Implemented in code | Cookie and JWT passive analysis plus session abstractions |
-| Input Validation Testing | Partial | Input review logic exists; active probing engine is not complete |
-| Error Handling | Partial | Misconfig checks likely cover disclosure; no dedicated workflow |
-| Weak Cryptography | Partial | TLS coverage exists; application crypto is not covered |
-| Business Logic | Missing | No stateful business-logic engine |
-| Client-Side Testing | Partial | HTML inventory and browser-policy signals only |
-| API Testing | Partial | Spec parsing and passive API analysis exist; advanced abuse cases remain limited |
+|-------------|--------|-------|
+| Information Gathering | Implemented | Passive crawler, HTML/JS inventory, tech fingerprinting via headers |
+| Configuration and Deployment Management | Implemented | Headers, TLS, misconfig, dependency review, secrets scan |
+| Identity Management | Missing | No username enumeration, account lifecycle, or identity workflow automation |
+| Authentication Testing | Partial | Passive auth flow review exists; end-to-end authenticated validation is not complete |
+| Authorization Testing | Partial | RBAC/IDOR tool exists; full multi-role active validation is limited |
+| Session Management | Implemented | Cookie and JWT passive analysis; session abstractions in place |
+| Input Validation Testing | Partial | Input surface analysis exists; active injection payload execution is not automated |
+| Error Handling | Partial | Misconfig tool covers error disclosure; no dedicated error injection workflow |
+| Weak Cryptography | Partial | TLS/certificate posture covered; application-layer crypto not reviewed |
+| Business Logic | Missing | No stateful business-logic engine or abuse-case modeling |
+| Client-Side Testing | Partial | HTML inventory and browser-policy header signals only; no DOM source/sink review |
+| API Testing | Partial | OpenAPI/Postman spec parsing and passive API analysis; advanced abuse cases not covered |
 
-## Verified ASVS Mapping
+---
+
+## OWASP ASVS Mapping
 
 | ASVS Area | Status | Notes |
-|----------|--------|------|
-| V1 Architecture, Design and Threat Modeling | Missing | No threat-model workflow |
-| V2 Authentication | Partial | Some controls assessed, many remain review-gap dependent |
-| V3 Session Management | Implemented in code | JWT/cookie parsing and session abstractions |
-| V4 Access Control | Partial | Tooling exists, but deep role-aware validation is limited |
-| V5 Validation, Sanitization and Encoding | Partial | Heuristic coverage only |
-| V6 Stored Cryptography | Missing | No crypto-at-rest review module |
-| V7 Error Handling and Logging | Partial | Logging skill exists, automation is not present |
-| V8 Data Protection | Partial | Transport and some evidence-safety controls exist |
-| V9 Communications | Implemented in code | TLS and header controls are covered |
-| V10 Malicious Code | Missing | No malware/upload abuse automation |
+|-----------|--------|-------|
+| V1 Architecture, Design and Threat Modeling | Missing | No threat-model workflow or architecture-control verification |
+| V2 Authentication | Partial | Some controls assessed passively; many depend on authenticated access or manual review |
+| V3 Session Management | Implemented | JWT/cookie parsing and session abstractions cover core controls |
+| V4 Access Control | Partial | RBAC/IDOR tooling exists; deep role-aware validation requires authenticated sessions |
+| V5 Validation, Sanitization and Encoding | Partial | Heuristic surface analysis only; active payload execution not implemented |
+| V6 Stored Cryptography | Missing | No crypto-at-rest review, key handling, or secrets storage analysis module |
+| V7 Error Handling and Logging | Partial | Misconfig checks cover error disclosure; logging review is skill-guided only |
+| V8 Data Protection | Partial | Transport security covered; sensitive data handling and storage review not automated |
+| V9 Communications | Implemented | TLS, security headers, and HSTS enforcement all covered |
+| V10 Malicious Code | Missing | No malware detection, upload abuse scanning, or anti-automation checks |
 | V11 Business Logic | Missing | Not implemented |
-| V12 Files and Resources | Partial | Some related checks exist, no dedicated traversal/resource engine |
-| V13 API and Web Service | Partial | Passive/API-spec oriented coverage |
-| V14 Configuration | Implemented in code | Misconfiguration and supporting checks exist |
+| V12 Files and Resources | Partial | Some related checks in input validation tool; no dedicated path traversal engine |
+| V13 API and Web Service | Partial | Passive and spec-oriented coverage; authenticated API abuse cases not complete |
+| V14 Configuration | Implemented | Misconfiguration checks, secrets scan, security headers, dependency review |
 
-## Existing Docs vs Code
+---
 
-### Implemented in code
+## Skill and Code Alignment
 
-- Headers/TLS
-- Dependency audit
-- Secrets scan
-- Evidence writer
-- Findings writer
-- Report generation
-- Run-state persistence
+### Implemented in code and supported by a skill
 
-### Partial
+| Domain | Code Module | Skill |
+|--------|-------------|-------|
+| Security Headers and TLS | `src/tools/headers_audit.py`, `src/tools/tls_audit.py` | `.claude/skills/headers-tls-audit/` |
+| Authentication Review | `src/tools/auth_audit.py` | `.claude/skills/auth-access-audit/` |
+| Authorization / RBAC | `src/tools/rbac_audit.py` | `.claude/skills/rbac-audit/` |
+| Session / JWT | `src/tools/session_jwt_audit.py`, `src/tools/cookie_audit.py` | `.claude/skills/session-jwt-audit/` |
+| Input Validation | `src/tools/input_validation_audit.py` | `.claude/skills/input-validation-audit/` |
+| Dependency Audit | `src/tools/dependency_audit.py`, `src/parsers/manifest.py` | `.claude/skills/dependency-audit/` |
+| Security Misconfiguration | `src/tools/misconfig_audit.py` | `.claude/skills/security-misconfig-audit/` |
+| Report Writing | `src/reporting/report_generator.py` | `.claude/skills/report-writer/` |
 
-- Authentication
-- RBAC/IDOR
-- Input validation
-- API security
-- Authenticated orchestration
-- Active testing controls
+### Implemented in code — no dedicated skill yet
 
-### Documented but unverified
+| Domain | Code Module |
+|--------|-------------|
+| API Security | `src/tools/api_audit.py`, `src/parsers/openapi_parser.py` |
+| Secrets Scanning | `src/tools/secrets_scan.py` |
+| Passive Web Crawl | `src/tools/crawler.py` |
 
-- Full broad active-testing coverage
-- Mature resumable workflow handling
-- Practical completeness across most OWASP domains
+### Skill-guided only — no automated code execution
 
-### Missing
+| Domain | Skill | Gap |
+|--------|-------|-----|
+| Logging and Monitoring | `.claude/skills/logging-monitoring-audit/` | No collector or automated review module |
+| PRD / Feature Security Review | `.claude/skills/prd-security-review/` | Design-time review only — no automation |
+| Release Gate Review | `.claude/skills/release-gate-review/` | Human-in-loop decision — no automation |
 
-- SAST
-- IaC scanning
-- container scanning
-- cloud posture
-- business-logic modeling
-- identity-management testing
+### Missing — no code, no skill
+
+| Domain |
+|--------|
+| SAST integration |
+| IaC scanning |
+| Container image scanning |
+| Cloud posture checks |
+| Business logic abuse modeling |
+| Identity management / username enumeration |
+| DOM source/sink and client-side storage review |
+| Stored cryptography review |
+
+---
+
+## Platform Completion Estimate
+
+Estimated maturity against a complete web application security assessment platform:
+
+| Capability Area | Estimate |
+|----------------|----------|
+| Governance, authorization, and safety model | 90–95% |
+| Reporting and audit artifact generation | 80–85% |
+| Passive testing execution | 85–90% |
+| Authenticated testing execution | 40–50% |
+| Active testing execution (authorization-gated) | 20–30% |
+| Engineering AppSec extensions (SAST, IaC, container, cloud) | 0–10% |
+| **Overall end-to-end coverage** | **55–70%** |
+
+> The 55–70% estimate assumes "complete" means covering passive, authenticated, active, API, and engineering AppSec domains. The platform is strong for passive assessment and reporting. Authenticated and active workflows exist as scaffolding but are not end-to-end.
+
+---
+
+## Recommended Next Build Order
+
+1. Wire `SessionManager` and `CredentialStore` into auth, RBAC, session, and API audit workflows
+2. Add a centralized stop-condition enforcement layer (currently per-tool, not pipeline-wide)
+3. Build a minimal active probe engine with authorization gating
+4. Add `src/tools/logging_audit.py` (logging/monitoring skill has no code counterpart)
+5. Improve run-state tracking to capture evidence IDs and support resume semantics
+6. Extend into engineering AppSec: SAST, IaC scanning
