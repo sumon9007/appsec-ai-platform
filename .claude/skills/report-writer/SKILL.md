@@ -115,6 +115,13 @@ Using `remediation-plan-template.md`:
 
 ---
 
+## Related Skills
+
+- `evidence-and-findings-ops` — use to verify finding records are complete and evidence is in `evidence/summarized/` before writing reports
+- `engagement-bootstrap` — creates the findings register this skill reads as ground truth
+
+---
+
 ## References
 
 - `.claude/docs/reporting-standard.md` — definitive reporting standards for this workspace

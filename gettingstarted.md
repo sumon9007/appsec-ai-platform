@@ -64,38 +64,45 @@ Key variables to set in `.env`:
 
 ---
 
-## 3. Configure Audit Context
+## 3. Create or Load an Engagement
 
-These four files must be populated before any audit activity can begin. They are the source of truth for scope, authorization, and constraints.
+All per-engagement data (context, evidence, findings, reports) lives under `engagements/<ENGAGEMENT_ID>/`.
 
-### `.claude/context/audit-context.md`
+### Create a new engagement
 
-Set the authorization status to `CONFIRMED` and record:
+```bash
+python scripts/create_engagement.py
+```
 
+Or copy the template manually:
+
+```bash
+cp -r engagements/_template engagements/AUDIT-YYYY-CLIENT-NNN
+```
+
+Then update `ACTIVE_ENGAGEMENT=AUDIT-YYYY-CLIENT-NNN` in your `.env` file.
+
+### Populate the four context files
+
+These files must be completed before any audit activity can begin. Find them at `engagements/<ENGAGEMENT_ID>/context/`:
+
+**`audit-context.md`** — Set `Authorization Status: CONFIRMED` and record:
 - Authorizing party name and title
 - Authorization date
 - Reference to authorization document (email, ticket, signed scope agreement)
 - Testing mode: `Passive Only` or `Passive + Active Testing on [ENVIRONMENT]`
 
-### `.claude/context/scope.md`
-
-Define clearly:
-
+**`scope.md`** — Define:
 - In-scope URLs, domains, and endpoints
 - Out-of-scope items (subdomains, third-party services, internal systems)
 
-### `.claude/context/target-profile.md`
-
-Describe the target application:
-
+**`target-profile.md`** — Describe the target:
 - Application name and purpose
 - Technology stack (if known)
 - Authentication model
 - Environment type (production, staging, QA)
 
-### `.claude/context/assumptions.md`
-
-List any assumptions you are making about the target, known unknowns, and evidence availability gaps.
+**`assumptions.md`** — List assumptions, known unknowns, and evidence availability gaps.
 
 > **Authorization check:** If `audit-context.md` does not have `Authorization Status: CONFIRMED`, the CLI and Claude workflows will halt.
 
@@ -182,7 +189,7 @@ python3 scripts/run_audit.py report executive
 python3 scripts/run_audit.py report remediation
 ```
 
-Reports are written to `reports/`.
+Reports are written to `engagements/<ENGAGEMENT_ID>/reports/draft/`.
 
 ---
 
@@ -214,11 +221,21 @@ Claude commands always read the context files first before executing.
 ```
 appsec-ai-platform/
 ├── .claude/
-│   ├── context/          # Audit context, scope, target profile, assumptions
-│   ├── commands/         # Slash command definitions
+│   ├── context/          # Pointer to active engagement (active.md)
+│   ├── commands/         # Slash command definitions (global)
 │   ├── rules/            # Governance rules (evidence, scope, severity, safety)
-│   ├── skills/           # Domain-specific review intelligence
-│   └── templates/        # Normalized output templates
+│   ├── skills/           # Domain-specific review intelligence (global)
+│   └── templates/        # Normalized output templates (global)
+├── engagements/          # All per-engagement working data
+│   ├── _template/        # Blank template — copy to start a new engagement
+│   └── AUDIT-YYYY-CLIENT-NNN/
+│       ├── context/      # Scope, authorization, target profile, assumptions
+│       ├── audit-runs/   # Session records and findings register
+│       │   ├── active/
+│       │   └── completed/
+│       ├── evidence/     # raw/, reviewed/, summarized/
+│       ├── reports/      # draft/, final/
+│       └── audits/       # weekly/, monthly/, quarterly/, release/, annual/
 ├── src/                  # Python automation layer
 │   ├── tools/            # Domain audit tools (headers, tls, cookies, etc.)
 │   ├── workflows/        # full_audit.py, passive_web_audit.py
@@ -228,11 +245,8 @@ appsec-ai-platform/
 │   ├── reporting/        # Report generator
 │   └── utils/            # Evidence writer, findings writer, context reader
 ├── scripts/
-│   └── run_audit.py      # Primary CLI entry point
-├── audits/               # Audit session records
-├── audit-runs/           # Run-state JSON (resumable workflows)
-├── evidence/             # raw/, reviewed/, summarized/
-├── reports/              # Generated reports
+│   ├── run_audit.py      # Primary CLI entry point
+│   └── create_engagement.py  # Engagement bootstrap tool
 ├── tests/                # Unit tests
 ├── docs/                 # Extended documentation
 └── requirements.txt

@@ -1,5 +1,7 @@
 # Coverage Matrix Verified
 
+> **Snapshot notice:** Last verified March 2026 against the Python automation layer (`src/`). Active testing capabilities remain limited — most domains are passive-only unless explicitly authorized. Engineering AppSec domains (SAST, IaC, cloud) remain missing.
+
 This document validates the platform’s claimed coverage against the current codebase.
 
 ## Verification Categories

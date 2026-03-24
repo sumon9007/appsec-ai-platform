@@ -64,10 +64,24 @@ OSV_API_BASE_URL: str = os.getenv("OSV_API_BASE_URL", "https://api.osv.dev/v1")
 OSV_BATCH_SIZE: int = 100         # packages per batch request
 OSV_INTER_BATCH_DELAY: float = 0.5  # seconds between batches
 
+# ── Engagement isolation ───────────────────────────────────────────────────────
+# Set ACTIVE_ENGAGEMENT to the engagement folder name (e.g. AUDIT-2026-DR-001).
+# When set, all data paths resolve inside engagements/<ACTIVE_ENGAGEMENT>/.
+# When unset, falls back to the legacy single-engagement layout for compatibility.
+ACTIVE_ENGAGEMENT: str = os.getenv("ACTIVE_ENGAGEMENT", "").strip()
+
 # ── Workspace paths (always resolved from project root) ───────────────────────
-CONTEXT_DIR = PROJECT_ROOT / ".claude" / "context"
-EVIDENCE_RAW_DIR = PROJECT_ROOT / "evidence" / "raw"
-AUDIT_RUNS_ACTIVE_DIR = PROJECT_ROOT / "audit-runs" / "active"
+if ACTIVE_ENGAGEMENT:
+    _engagement_dir = PROJECT_ROOT / "engagements" / ACTIVE_ENGAGEMENT
+    CONTEXT_DIR       = _engagement_dir / "context"
+    EVIDENCE_RAW_DIR  = _engagement_dir / "evidence" / "raw"
+    AUDIT_RUNS_ACTIVE_DIR = _engagement_dir / "audit-runs" / "active"
+else:
+    # Legacy fallback: single-engagement layout
+    CONTEXT_DIR       = PROJECT_ROOT / ".claude" / "context"
+    EVIDENCE_RAW_DIR  = PROJECT_ROOT / "evidence" / "raw"
+    AUDIT_RUNS_ACTIVE_DIR = PROJECT_ROOT / "audit-runs" / "active"
+
 FINDINGS_REGISTER_FILENAME = "findings-register.md"
 
 # Default findings register path — env override takes precedence, then workspace default

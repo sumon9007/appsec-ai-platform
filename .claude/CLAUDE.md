@@ -80,14 +80,15 @@ All inputs default to `.env` variables. See `.env.example` for all configurable 
 
 Claude must treat this repository as an audit operating system with these layers:
 
-1. `context/` = current target and engagement source of truth
-2. `commands/` = workflow entry points
-3. `rules/` = governance and output controls
-4. `skills/` = domain-specific review intelligence
-5. `templates/` = normalized output structures
-6. `prompts/` = reusable reasoning helpers (`analysis.md`, `audit.md`, `reporting.md`)
-7. `src/` = Python automation layer — runnable tools, workflows, models, policies
-8. root folders (`audits/`, `audit-runs/`, `evidence/`, `reports/`) = working data and outputs
+1. `.claude/context/active.md` = pointer to the active engagement
+2. `engagements/<ID>/context/` = engagement-specific context source of truth
+3. `.claude/commands/` = workflow entry points (global, shared across engagements)
+4. `.claude/rules/` = governance and output controls (global)
+5. `.claude/skills/` = domain-specific and lifecycle review intelligence (global)
+6. `.claude/templates/` = normalized output structures (global)
+7. `.claude/prompts/` = reusable reasoning helpers (global)
+8. `src/` = Python automation layer — runnable tools, workflows, models, policies (global)
+9. `engagements/<ID>/` = per-engagement working data: audit-runs, evidence, reports, audits
 
 Claude must always work from this model.
 
@@ -128,14 +129,40 @@ Claude should not act as:
 
 ---
 
+## Engagement Isolation Model
+
+This workspace supports multiple client engagements. All per-engagement data lives under `engagements/<ENGAGEMENT_ID>/` — **not** in the root `audit-runs/`, `evidence/`, or `reports/` directories, which are empty templates only.
+
+The active engagement is identified in `.claude/context/active.md` and by the `ACTIVE_ENGAGEMENT` env var.
+
+### Engagement directory structure
+
+```
+engagements/
+  _template/                   ← blank template for new engagements
+  AUDIT-YYYY-CLIENT-NNN/
+    context/                   ← context, scope, authorization, assumptions
+    audit-runs/active/         ← findings register, session records
+    evidence/raw|reviewed|summarized/
+    reports/draft|final/
+    audits/weekly|monthly|quarterly|release|annual/
+```
+
+To start a new engagement: copy `engagements/_template/`, populate context files, set `ACTIVE_ENGAGEMENT` in `.env`, and update `.claude/context/active.md`.
+
+---
+
 ## Context-First Rule
 
-Before performing any audit workflow, always read these files first:
+Before performing any audit workflow, always:
 
-- `.claude/context/audit-context.md`
-- `.claude/context/target-profile.md`
-- `.claude/context/scope.md`
-- `.claude/context/assumptions.md`
+1. Read `.claude/context/active.md` to identify the active engagement ID.
+2. Then read the four context files for that engagement:
+
+   - `engagements/<ENGAGEMENT_ID>/context/audit-context.md`
+   - `engagements/<ENGAGEMENT_ID>/context/target-profile.md`
+   - `engagements/<ENGAGEMENT_ID>/context/scope.md`
+   - `engagements/<ENGAGEMENT_ID>/context/assumptions.md`
 
 These files are the primary source of truth for:
 - target URL
@@ -321,13 +348,13 @@ Use and maintain:
 - `.claude/docs/`
 
 ### Working data layer
-Do not move or misuse:
-- `audits/`
-- `audit-runs/`
-- `evidence/`
-- `reports/`
+All operational audit data lives inside `engagements/<ENGAGEMENT_ID>/`:
+- `engagements/<ID>/audit-runs/` — session files and findings register
+- `engagements/<ID>/evidence/` — raw, reviewed, and summarized evidence
+- `engagements/<ID>/reports/` — draft and final report outputs
+- `engagements/<ID>/audits/` — cadence-based audit records
 
-These root folders store operational audit data.
+The root-level `audit-runs/`, `evidence/`, `reports/`, and `audits/` directories are **empty templates only** — do not write engagement data to them.
 
 ---
 
@@ -376,6 +403,13 @@ Explicitly label assumptions, unknowns, and manual validation requirements.
 
 The main commands for this workspace are:
 
+### Engagement and Lifecycle Skills (use these to manage the audit lifecycle)
+- `engagement-bootstrap` — initialize and validate a new engagement before any audit activity
+- `evidence-and-findings-ops` — classify observations, label evidence, create and close findings
+- `audit-cadence-orchestrator` — select the right domains and depth for weekly / monthly / quarterly / annual audits
+- `release-gate-review` — pre-release security gate: scope analysis, domain review, gate decision
+- `prd-security-review` — design-time review of PRDs and feature specs for security impact
+
 ### Audit Orchestration
 - `/audit-full-website` — full structured audit (use `audit full` Python CLI for automated execution)
 
@@ -397,7 +431,7 @@ The main commands for this workspace are:
 - `/start-session`
 - `/close-finding`
 
-Claude should favor these commands over ad hoc workflows.
+Claude should favor these commands and lifecycle skills over ad hoc workflows.
 
 ---
 

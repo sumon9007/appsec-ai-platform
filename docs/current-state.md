@@ -1,5 +1,7 @@
 # Current State
 
+> **Snapshot notice:** This document was last verified against the codebase in March 2026. It accurately reflects the Python automation layer (`src/`). The per-engagement isolation model (`engagements/<ID>/`) was introduced after this snapshot — see `engagements/README.md` and `.claude/CLAUDE.md` for the current operating model.
+
 ## Verified Implementation Summary
 
 The repository contains a functional Python CLI with working workflows, storage, evidence writing, findings serialization, and report generation. The strongest verified areas are:

@@ -1,5 +1,7 @@
 # Roadmap Alignment
 
+> **Snapshot notice:** Last verified March 2026. Python layer status is current. Phase completion estimates reflect the automation layer only — the engagement isolation model and governance layer (`engagements/`, `.claude/`) are not reflected in the phase matrix below.
+
 ## Summary
 
 The current codebase aligns well with the early roadmap phases, but later phases are only partially started.

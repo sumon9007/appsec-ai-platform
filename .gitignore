@@ -29,3 +29,10 @@ token_cache*
 # Audit outputs — tracked separately, not via git by default
 output/
 site/
+
+# Legacy root-level audit dirs — superseded by engagements/<ID>/ model
+# All engagement data must live under engagements/<ENGAGEMENT_ID>/
+audit-runs/
+evidence/
+reports/
+audits/
